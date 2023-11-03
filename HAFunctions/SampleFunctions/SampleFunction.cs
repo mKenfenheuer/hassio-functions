@@ -13,17 +13,17 @@ public class MySampleFunctionClass
         _logger = logger;
     }
 
-    [StateTrigger("light.licht_kuche")]
+    [StateTrigger("light.licht_kuche", to: "on")]
     public async Task OnStateChangeLichtKüche(Context context) 
     {
-        _logger.LogInformation($"Received state change on {context.Event.Data.EntityId}");
+        _logger.LogInformation($"State changed to on: {context.Event.Data.EntityId}");
         await Task.Run(() => {});
     }
 
-    [StateTrigger("light.licht_flur")]
+    [StateTrigger("light.licht_kuche", to: "off")]
     public async Task OnStateChangeLichtFlur(Context context) 
     {
-        _logger.LogInformation($"New State change on {context.Event.Data.EntityId}");
+        _logger.LogInformation($"State changed to off: {context.Event.Data.EntityId}");
         await Task.Run(() => {});
     }
 }

@@ -4,11 +4,33 @@
 }
 
 
+
+
+
 @foreach (var item in Model)
 {
-    <h5><a asp-action="Edit" asp-route-file="@item.FileName">@item.FileName</a></h5>
-    @foreach (var method in item.DefinedFunctions)
-    {
-        <h6>@method.Name</h6>
-    }
+    <div class="accordion" id="@item.FileName">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="@item.FileName">
+                <button class="accordion-button bg-homeassistant text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    <img src="~/img/ha_function_file.svg" height="40" class="me-2" />@item.FileName
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="@item.FileName" data-bs-parent="#@item.FileName">
+                <div class="accordion-body d-flex flex-column-reverse flex-md-row">
+                    <div class="flex-grow-1 flex-shrink-1">
+                        <p><strong>The following methods with trigger attributes were detected in the file:</strong></p>
+                        @foreach (var method in item.DefinedFunctions)
+                        {
+                            <p><code class="text-dark"><span class="ha-function-bracket">[</span><span class="ha-function-type">StateTrigger</span><span class="ha-function-methodname">(</span><span class="ha-function-string">"light.licht_kuche"</span>, to: <span class="ha-function-string">"on"</span>)<span class="ha-function-bracket">]</span><br/>
+                            <span class="ha-function-type">@method.ReturnType.Name</span> <span class="ha-function-methodname">@method.Name</span><span class="ha-function-bracket">(</span>@foreach(var param in @method.GetParameters()) {<span class="ha-function-type">@param.ParameterType.Name</span> @param.Name if(param != method.GetParameters().LastOrDefault()) {<span>,</span>}}<span class="ha-function-bracket">) {</span> ... <span class="ha-function-bracket">}</span></code></p>
+                        }
+                    </div>
+                    <div class="actions d-flex flex-column">
+                        <a class="btn btn-primary mb-2" asp-action="Edit" asp-route-file="@item.FileName">Edit</a>
+                    </div>                   
+                </div>
+            </div>
+        </div>
+    </div>
 }
