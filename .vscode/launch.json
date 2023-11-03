@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/HAFunctions.UI/bin/Debug/net7.0/HAFunctions.UI.dll",
+            "program": "${workspaceFolder}/HAFunctions/HAFunctions.UI/bin/Debug/net7.0/HAFunctions.UI.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/HAFunctions.UI/",
+            "cwd": "${workspaceFolder}/HAFunctions/HAFunctions.UI/",
             "stopAtEntry": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"

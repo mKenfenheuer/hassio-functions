@@ -29,6 +29,15 @@ public class Program
             app.UseHsts();
         }
 
+        app.Use(async (context, next) => 
+        {
+            if(context.Request.Headers.ContainsKey("X-Ingress-Path"))
+            {
+                context.Request.PathBase = context.Request.Headers["X-Ingress-Path"].ToString();
+            }
+            await next();
+        });
+
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
