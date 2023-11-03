@@ -49,7 +49,7 @@
                                 }
                                 @Html.Raw(")")<span class="ha-function-bracket">@Html.Raw("]")</span><br/>
                             }
-                            <span class="ha-function-type">@method.ReturnType.Name</span> <span class="ha-function-methodname">@method.Name</span><span class="ha-function-bracket">(</span>@foreach(var param in @method.GetParameters()) {<span class="ha-function-type">@param.ParameterType.Name</span> @param.Name if(param != method.GetParameters().LastOrDefault()) @Html.Raw("{")<span>,</span>@Html.Raw("}")}<span class="ha-function-bracket">) @Html.Raw("{")</span> ... <span class="ha-function-bracket">@Html.Raw("}")</span></code></p>
+                            <span class="ha-function-type">@method.ReturnType.Name</span> <span class="ha-function-methodname">@method.Name</span><span class="ha-function-bracket">(</span>@foreach(var param in @method.GetParameters()) {<span class="ha-function-type">@param.ParameterType.Name</span> @param.Name if(param != method.GetParameters().LastOrDefault()) {<span>,</span>}}<span class="ha-function-bracket">) @Html.Raw("{")</span> ... <span class="ha-function-bracket">@Html.Raw("}")</span></code></p>
                         }
                     </div>
                     <div class="actions d-flex flex-column">
