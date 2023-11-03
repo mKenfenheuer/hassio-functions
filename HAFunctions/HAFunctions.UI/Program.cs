@@ -22,13 +22,6 @@ public class Program
         builder.Services.AddHostedService<HomeAssistantConnectionService>();
 
         app = builder.Build();
-        
-        // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Home/Error");
-            app.UseHsts();
-        }
 
         //Enable relative path for HASSIO Ingress
         app.Use(async (context, next) => 
@@ -39,8 +32,15 @@ public class Program
             }
             await next();
         });
-
-        app.UseHttpsRedirection();
+        
+        // Configure the HTTP request pipeline.
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
+            app.UseHttpsRedirection();
+        }
+        
         app.UseStaticFiles();
 
         app.UseRouting();
