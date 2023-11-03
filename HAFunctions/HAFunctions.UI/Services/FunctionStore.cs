@@ -1,6 +1,7 @@
 
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Security.Cryptography;
 using HAFunctions.Shared;
 using HAFunctions.UI.Models;
 using Microsoft.CodeAnalysis;
@@ -73,7 +74,10 @@ public class FunctionStore
         {
             Functions.Add(new FunctionModel
             {
-                FileName = kvp.Key.Replace(directory,""),
+                FileHash = ComputeFileHash(kvp.Key),
+                Code = File.ReadAllText(kvp.Key),
+                FilePath = kvp.Key,
+                FileName = kvp.Key.Replace($"{directory}{Path.DirectorySeparatorChar}",""),
                 DefinedFunctions = kvp.Value
                                         .GetTypes()
                                         .SelectMany(t => t.GetMethods())
@@ -83,6 +87,13 @@ public class FunctionStore
         }
 
         _logger.LogInformation($"Loaded {_assemblies.Count} assemblies with {Functions.Sum(f => f.DefinedFunctions.Length)} methods into FunctionStore.");
+    }
+
+    private string ComputeFileHash(string file)
+    {
+        SHA1 algorithm = SHA1.Create();
+        var hashBytes = algorithm.ComputeHash(File.ReadAllBytes(file));
+        return BitConverter.ToString(hashBytes).Replace("-","");
     }
 
     public async Task CallMatchingFunctions(Context context)

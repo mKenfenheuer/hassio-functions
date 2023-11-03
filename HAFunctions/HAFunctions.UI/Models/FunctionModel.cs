@@ -4,11 +4,9 @@ namespace HAFunctions.UI.Models;
 
 public class FunctionModel
 {
+    public string FileHash { get; set; }
     public string FileName { get; set; }
-    public string Code
-    {
-        get => File.ReadAllText(FileName);
-        set => File.WriteAllText(FileName, value);
-    }
+    public string FilePath { get; set; }
+    public string Code { get; set; }
     public MethodInfo[] DefinedFunctions { get; set; }
 }

@@ -1,0 +1,47 @@
+@model HAFunctions.UI.Models.FunctionModel
+@{
+    ViewData["Title"] = "Edit Functions";
+    Layout = "/Views/Shared/_LayoutFullscreen.cshtml";
+}
+
+@section Header 
+{
+    <style>
+        textarea {
+            display:none;
+        }
+        .CodeMirror {
+            height:100%;
+        }
+    </style>
+}
+
+@section Navbar
+{
+    <button type="submit" class="btn btn-primary">Save</button>
+}
+<form asp-action="Edit" class="form-inline">
+    <input type="hidden" asp-for="FileName" />
+    <textarea asp-for="Code"></textarea>
+</form>
+
+@section Scripts
+{
+<script src="~/js/csharp-lint.js" ></script>
+<script>
+    var objectivecEditor = CodeMirror.fromTextArea(document.getElementById("Code"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: "text/x-csharp",
+        gutters: ["CodeMirror-lint-markers"],
+        lint: true,
+        getAnnotations: function(text) {
+            var found = [];
+            found.push({ from: 1, to: 2, message: "This is fucked up" });
+            return found;
+        }
+    });
+</script>
+}
+
+

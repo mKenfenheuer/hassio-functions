@@ -6,7 +6,7 @@
 
 @foreach (var item in Model)
 {
-    <h5>@item.FileName</h5>
+    <h5><a asp-action="Edit" asp-route-file="@item.FileName">@item.FileName</a></h5>
     @foreach (var method in item.DefinedFunctions)
     {
         <h6>@method.Name</h6>

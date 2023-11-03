@@ -9,10 +9,8 @@ namespace HAFunctions.UI.Services;
 
 public class FunctionCompiler 
 {
-    public AssemblyCompileResult CompileFunction(string file, AssemblyLoadContext loadContext)
+    public AssemblyCompileResult CompileFunctionCode(string code, AssemblyLoadContext loadContext, bool load = true)
     {
-        String code = File.ReadAllText(file);
-
         // define source code, then parse it (to the type used for compilation)
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
 
@@ -21,7 +19,7 @@ public class FunctionCompiler
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
 
-        MetadataReference[] references = assemblies.Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray();
+        MetadataReference[] references = assemblies.Where(a => a.Location != null && a.Location != string.Empty).Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray();
 
         // analyse and generate IL code from syntax tree
         CSharpCompilation compilation = CSharpCompilation.Create(
@@ -46,21 +44,70 @@ public class FunctionCompiler
                 {
                     Success = false,
                     Assembly = null,
-                    Diagnostics = result.Diagnostics.ToArray(),
+                        Diagnostics = result.Diagnostics.Select(d => new FunctionCompilerDiagnostic() {
+                            Severity = d.Severity.ToString().ToLower(),
+                            Message = d.GetMessage(),
+                            From = new FileLinePosition() 
+                            {
+                                Line = d.Location.GetLineSpan().StartLinePosition.Line,
+                                Character = d.Location.GetLineSpan().StartLinePosition.Character,
+                            },
+                            To = new FileLinePosition() 
+                            {
+                                Line = d.Location.GetLineSpan().EndLinePosition.Line,
+                                Character = d.Location.GetLineSpan().EndLinePosition.Character,
+                            }
+                        }).ToArray(),
                 };
             }
             else
             {
                 // load this 'virtual' DLL so that we can use
+                if(!load)
+                    return new AssemblyCompileResult()
+                    {
+                        Success = true,
+                        Assembly = null,
+                        Diagnostics = result.Diagnostics.Select(d => new FunctionCompilerDiagnostic() {
+                            Severity = d.Severity.ToString().ToLower(),
+                            Message = d.GetMessage(),
+                            From = new FileLinePosition() 
+                            {
+                                Line = d.Location.GetLineSpan().StartLinePosition.Line,
+                                Character = d.Location.GetLineSpan().StartLinePosition.Character,
+                            },
+                            To = new FileLinePosition() 
+                            {
+                                Line = d.Location.GetLineSpan().EndLinePosition.Line,
+                                Character = d.Location.GetLineSpan().EndLinePosition.Character,
+                            }
+                        }).ToArray(),
+                    };
+
                 ms.Seek(0, SeekOrigin.Begin);
                 Assembly assembly = loadContext.LoadFromStream(ms);
                 return new AssemblyCompileResult()
                 {
                     Success = true,
                     Assembly = assembly,
-                    Diagnostics = result.Diagnostics.ToArray(),
+                    Diagnostics = result.Diagnostics.Select(d => new FunctionCompilerDiagnostic() {
+                        Severity = d.Severity.ToString().ToLower(),
+                        Message = d.GetMessage(),
+                        From = new FileLinePosition() 
+                        {
+                            Line = d.Location.GetLineSpan().StartLinePosition.Line,
+                            Character = d.Location.GetLineSpan().StartLinePosition.Character,
+                        },
+                        To = new FileLinePosition() 
+                        {
+                            Line = d.Location.GetLineSpan().EndLinePosition.Line,
+                            Character = d.Location.GetLineSpan().EndLinePosition.Character,
+                        }
+                    }).ToArray(),
                 };
             }
         }
     }
+
+    public AssemblyCompileResult CompileFunction(string file, AssemblyLoadContext loadContext, bool load = true) => CompileFunctionCode(File.ReadAllText(file), loadContext, load);
 }

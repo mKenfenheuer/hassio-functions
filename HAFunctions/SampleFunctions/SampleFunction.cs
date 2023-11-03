@@ -23,7 +23,7 @@ public class MySampleFunctionClass
     [StateTrigger("light.licht_flur")]
     public async Task OnStateChangeLichtFlur(Context context) 
     {
-        _logger.LogInformation($"Received state change on {context.Event.Data.EntityId}");
+        _logger.LogInformation($"New State change on {context.Event.Data.EntityId}");
         await Task.Run(() => {});
     }
 }

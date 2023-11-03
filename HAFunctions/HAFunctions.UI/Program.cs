@@ -13,7 +13,8 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews()
+                        .AddRazorRuntimeCompilation();
         builder.Services.AddSingleton<FunctionCompiler>();
         builder.Services.AddSingleton<FunctionStore>();
         builder.Services.AddSingleton<ApiClient>();
@@ -29,6 +30,7 @@ public class Program
             app.UseHsts();
         }
 
+        //Enable relative path for HASSIO Ingress
         app.Use(async (context, next) => 
         {
             if(context.Request.Headers.ContainsKey("X-Ingress-Path"))
