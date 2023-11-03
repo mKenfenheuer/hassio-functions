@@ -2,7 +2,7 @@
     "name": "HAFunctions",
     "slug": "hassio-functions",
     "version": "1.0.0",
-    "description": "",
+    "description": "Automation with simple C# functions",
     "url": "https://github.com/mkenfenheuer/hassio-functions",
     "arch": [
         "aarch64",
@@ -14,5 +14,7 @@
     ],
     "homeassistant_api": true,
     "ingress": true,
-    "ingress_port": 80
+    "ingress_port": 80,
+    "panel_icon": "mdi:code-block-braces",
+    "panel_title": "HA Functions"
 }
