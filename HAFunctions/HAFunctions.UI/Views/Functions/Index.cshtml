@@ -38,15 +38,14 @@
                                 {
                                     var a = parameters[i];
                                     @Html.Raw($"{a.Parameter.Name}:") <span class="ha-function-string">
-                                        @if(a.Argument.Value is string)
-                                        {
-                                            @Html.Raw($"\"{a.Argument.Value?.ToString()}\"")
-                                        }
-                                        else 
-                                        {
-                                            @Html.Raw($"{a.Argument.Value?.ToString()}")
-                                        }
-                                        </span>if(i+1 < parameters.Count) {@Html.Raw(", ")}
+                                    @if(a.Argument.Value is string)
+                                    {
+                                        @Html.Raw($"\"{a.Argument.Value?.ToString()}\"")
+                                    }
+                                    else 
+                                    {
+                                        @Html.Raw($"{a.Argument.Value?.ToString()}")
+                                    }</span>if(i+1 < parameters.Count){@Html.Raw(", ")}
                                 }
                                 @Html.Raw(")")<span class="ha-function-bracket">@Html.Raw("]")</span><br/>
                             }
