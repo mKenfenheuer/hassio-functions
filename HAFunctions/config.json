@@ -9,6 +9,11 @@
         "amd64",
         "armhf"
     ],
+    "map":[
+        "homeassistant_config",
+        "addon_config"
+    ],
+    "homeassistant_api": true,
     "ingress": true,
     "ingress_port": 80
 }
