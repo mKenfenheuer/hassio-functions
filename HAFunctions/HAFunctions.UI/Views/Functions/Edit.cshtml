@@ -7,9 +7,6 @@
 @section Header 
 {
     <style>
-        textarea {
-            display:none;
-        }
         .CodeMirror {
             height:100%;
         }
@@ -22,7 +19,7 @@
 }
 <form asp-action="Edit" class="form-inline">
     <input type="hidden" asp-for="FileName" />
-    <textarea asp-for="Code"></textarea>
+    <textarea class="d-none" asp-for="Code"></textarea>
 </form>
 
 @section Scripts
@@ -41,6 +38,7 @@
             return found;
         }
     });
+    $('#Code').removeClass("d-none");
 </script>
 }
 
