@@ -10,8 +10,7 @@
         "armhf"
     ],
     "map":[
-        "homeassistant_config:rw",
-        "addon_config:rw"
+        "config:rw"
     ],
     "homeassistant_api": true,
     "ingress": true,
