@@ -1,0 +1,14 @@
+@model IEnumerable<HAFunctions.UI.Models.FunctionModel>
+@{
+    ViewData["Title"] = "Functions";
+}
+
+
+@foreach (var item in Model)
+{
+    <h5>@item.FileName</h5>
+    @foreach (var method in item.DefinedFunctions)
+    {
+        <h6>@method.Name</h6>
+    }
+}
