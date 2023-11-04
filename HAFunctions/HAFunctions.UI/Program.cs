@@ -42,15 +42,17 @@ public class Program
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
-            app.UseHsts();
-            app.UseHttpsRedirection();
+
+            if(app.Configuration["HSTSEnabled"] == "true")
+                app.UseHsts();
+
+            if(app.Configuration["HTTPS:Redirection"] == "true")
+                app.UseHttpsRedirection();
         }
         
         app.UseStaticFiles();
 
         app.UseRouting();
-
-        app.UseAuthorization();
 
         app.MapControllerRoute(
             name: "default",
