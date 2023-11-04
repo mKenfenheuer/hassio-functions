@@ -27,7 +27,7 @@ body {
 for details on configuring this project to bundle and minify static web assets. */
 
 .bg-homeassistant {
-  background-color: #3dbcf3!important;
+  background-color: #038fc7!important;
 }
 
 .accordion-button.bg-homeassistant::after {
