@@ -11,5 +11,13 @@
         <li class="nav-item">
             <a class="nav-link" asp-area="" asp-controller="Functions" asp-action="Index">Functions</a>
         </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="systemDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                System
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="systemDropdown">
+                <li><a class="dropdown-item" asp-action="Logs" asp-controller="System">Logs</a></li>
+            </ul>
+        </li>
     </ul>
 </div>

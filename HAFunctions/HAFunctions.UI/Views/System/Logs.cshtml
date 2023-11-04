@@ -1,0 +1,27 @@
+@using HAFunctions.UI.Logging
+@model IEnumerable<InMemoryLogEntry>
+@{
+    ViewData["Title"] = "System Logs";
+}
+
+<div class="card bg-dark text-light overflow-scroll p-2">
+    <table>
+        @foreach (var entry in Model)
+        {
+            <tr>
+                <td class="text-nowrap pe-1">
+                    @Html.DisplayFor(item => entry.Time)
+                </td>
+                <td class="text-nowrap pe-1">
+                    @Html.DisplayFor(item => entry.Source)
+                </td>
+                <td class="text-nowrap pe-1 @entry.BootstrapClass">
+                    @Html.DisplayFor(item => entry.Severity)
+                </td>
+                <td class="text-nowrap pe-1">
+                    @Html.DisplayFor(item => entry.Message)
+                </td>
+            </tr>
+        }
+    </table>
+</div>

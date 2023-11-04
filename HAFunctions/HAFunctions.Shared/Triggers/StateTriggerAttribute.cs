@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace HAFunctions.Shared;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
@@ -34,7 +36,7 @@ public sealed class StateTriggerAttribute : HAFunctionTriggerAttribute
 
     public override bool IsMatch(Event e)
     {
-        if (!EntityIds.Any(id => id == e.Data.EntityId))
+        if (!EntityIds.Any(id => id == e.Data.EntityId || Regex.IsMatch(e?.Data?.EntityId ?? "", id)))
             return false;
         if (From != null && e.Data.OldState.StateValue != from)
             return false;

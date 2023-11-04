@@ -149,4 +149,40 @@ public class FunctionStore
         }
         return info.Invoke(paramObjs.ToArray());
     }
+
+    public void AddFunction(FunctionModel model)
+    {
+        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/HAFunctions/Functions";
+        var path = Path.Combine(directory, model.FileName);
+        if(File.Exists(path))
+        {
+            throw new Exception($"File {model.FileName} is already existing. Edit function!");
+        }
+        File.WriteAllText(path, model.Code);
+        LoadFunctions();
+    }
+
+    public void UpdateFunction(FunctionModel model)
+    {
+        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/HAFunctions/Functions";
+        var path = Path.Combine(directory, model.FileName);
+        if(!File.Exists(path))
+        {
+            throw new FileNotFoundException($"File {model.FileName} was not found!");
+        }
+        File.WriteAllText(path, model.Code);
+        LoadFunctions();
+    }
+
+    public void DeleteFunction(FunctionModel model)
+    {
+        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/HAFunctions/Functions";
+        var path = Path.Combine(directory, model.FileName);
+        if(!File.Exists(path))
+        {
+            throw new FileNotFoundException($"File {model.FileName} was not found!");
+        }
+        File.Delete(path);
+        LoadFunctions();
+    }
 }

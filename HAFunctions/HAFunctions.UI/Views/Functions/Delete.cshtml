@@ -1,0 +1,93 @@
+@model HAFunctions.UI.Models.FunctionModel
+@{
+    ViewData["Title"] = "Delete Function";
+}
+
+@section Header 
+{
+
+}
+@{
+    var item = Model;
+    var Index = 0;
+}
+
+
+
+<p>Are you sure you want to delete this function?</p>
+<form id="Delete" asp-action="Delete" class="form-inline">
+    <input type="hidden" asp-for="FileName" />
+    <a asp-action="Index" class="btn btn-primary">No, go back</a>
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+</form>
+
+<div class="accordion mt-4" id="accordion-@Index">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="heading-@Index">
+            <button class="accordion-button bg-homeassistant text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Index" aria-expanded="false" aria-controls="collapse-@Index">
+                <img src="~/img/ha_function_file.svg" height="40" class="me-2" />@item.FileName
+            </button>
+        </h2>
+        <div id="collapse-@Index" class="accordion-collapse collapse show" aria-labelledby="heading-@Index" data-bs-parent="#accordion-@Index">
+            <div class="accordion-body d-flex flex-column-reverse flex-md-row">
+                <div class="flex-grow-1 flex-shrink-1">
+                    <p><strong>The following methods with trigger attributes were detected in the file:</strong></p>
+                    @foreach (var method in item.DefinedFunctions)
+                    {
+                        var triggers = method.CustomAttributes.Where(a => a.AttributeType.IsSubclassOf(typeof(HAFunctionTriggerAttribute)));
+                        <p><code class="text-dark">
+                        @foreach(var trigger in triggers)
+                        {
+                            var parameters = new List<dynamic>();
+                            for(var i = 0; i < trigger.Constructor.GetParameters().Length; i++)
+                                if(trigger.ConstructorArguments[i].Value != null)
+                                    parameters.Add(new { Parameter = trigger.Constructor.GetParameters()[i], Argument = trigger.ConstructorArguments[i]});
+
+                            <span class="ha-function-bracket">@Html.Raw("[")</span><span class="ha-function-type">@(trigger.AttributeType.Name)</span>@Html.Raw("<span class=\"ha-function-methodname\">(</span>")
+                            @for(var i = 0; i < parameters.Count; i++)
+                            {
+                                var a = parameters[i];
+                                @Html.Raw($"{a.Parameter.Name}:") <span class="ha-function-string">
+                                @if(a.Argument.Value is string)
+                                {
+                                    @Html.Raw($"\"{a.Argument.Value?.ToString()}\"")
+                                }
+                                else 
+                                {
+                                    @Html.Raw($"{a.Argument.Value?.ToString()}")
+                                }</span>if(i+1 < parameters.Count){@Html.Raw(", ")}
+                            }
+                            @Html.Raw(")")<span class="ha-function-bracket">@Html.Raw("]")</span><br/>
+                        }
+                        <span class="ha-function-type">@method.ReturnType.Name</span> <span class="ha-function-methodname">@method.Name</span><span class="ha-function-bracket">(</span>@foreach(var param in @method.GetParameters()) {<span class="ha-function-type">@param.ParameterType.Name</span> @param.Name if(param != method.GetParameters().LastOrDefault()) {<span>,</span>}}<span class="ha-function-bracket">) @Html.Raw("{")</span> ... <span class="ha-function-bracket">@Html.Raw("}")</span></code></p>
+                    }
+                </div>               
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+<script src="~/lib/codemirror/lib/codemirror.js"></script>
+<script src="~/lib/codemirror/mode/clike/clike.js"></script>
+<script src="~/lib/codemirror/addon/lint/lint.js"></script>
+<script src="~/js/csharp-lint.js" ></script>
+<script>
+    var objectivecEditor = CodeMirror.fromTextArea(document.getElementById("Code"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: "text/x-csharp",
+        gutters: ["CodeMirror-lint-markers"],
+        lint: true,
+        getAnnotations: function(text) {
+            var found = [];
+            found.push({ from: 1, to: 2, message: "This is fucked up" });
+            return found;
+        }
+    });
+    $('#Code').removeClass("d-none");
+</script>
+}
+
+

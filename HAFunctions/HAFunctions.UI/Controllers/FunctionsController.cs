@@ -23,6 +23,24 @@ public class FunctionsController : Controller
     }
 
     [HttpGet]
+    public IActionResult New()
+    {
+        return View();
+    }
+
+
+    [HttpPost]
+    public IActionResult New([Bind("FileName,Code")] FunctionModel model)
+    {
+        var FunctionCode = System.IO.File.ReadAllText("wwwroot/StartingFunction.cs.txt");
+        model.Code = FunctionCode;
+
+        _store.AddFunction(model);
+
+        return RedirectToAction("Edit", new { file = model.FileName });;
+    }
+
+    [HttpGet]
     public IActionResult Edit(string file)
     {
         return View(_store.Functions.FirstOrDefault(f => f.FileName == file));
@@ -35,12 +53,29 @@ public class FunctionsController : Controller
 
         if(fileModel == null)
             return NotFound();
-        
-        System.IO.File.WriteAllText(fileModel.FilePath,model.Code);
 
-        _store.LoadFunctions();
+        _store.UpdateFunction(model);
 
         return RedirectToAction(nameof(Edit),new {file = fileModel.FileName});
+    }
+
+    [HttpGet]
+    public IActionResult Delete(string file)
+    {
+        return View(_store.Functions.FirstOrDefault(f => f.FileName == file));
+    }
+
+    [HttpPost]
+    public IActionResult Delete([Bind("FileName,Code")] FunctionModel model)
+    {
+        var fileModel = _store.Functions.FirstOrDefault(f => f.FileName == model.FileName);
+
+        if(fileModel == null)
+            return NotFound();
+
+        _store.DeleteFunction(model);
+
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]

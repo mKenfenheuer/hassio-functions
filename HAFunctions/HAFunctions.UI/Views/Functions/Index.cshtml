@@ -4,9 +4,10 @@
 
 }
 
-
-
-
+@section Navbar
+{
+    <a class="btn btn-danger" asp-action="New">New Function</a>
+}
 
 @for(var Index = 0; Index < Model.Count(); Index++)
 {
@@ -54,6 +55,7 @@
                     </div>
                     <div class="actions d-flex flex-column">
                         <a class="btn btn-primary mb-2" asp-action="Edit" asp-route-file="@item.FileName">Edit</a>
+                        <a class="btn btn-danger mb-2" asp-action="Delete" asp-route-file="@item.FileName">Delete</a>
                     </div>                   
                 </div>
             </div>

@@ -1,0 +1,21 @@
+using HAFunctions.Shared;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+
+namespace HAFunctions.Example;
+
+public class MySampleFunctionClass
+{
+    private readonly ILogger<MySampleFunctionClass> _logger;
+
+    public MySampleFunctionClass(ILogger<MySampleFunctionClass> logger)
+    {
+        _logger = logger;
+    }
+
+    [StateTrigger("light.*", to: "on")]
+    public void OnStateChangeLightToOn(Context context) 
+    {
+        _logger.LogInformation($"Light {context.Event.Data.EntityId} was turned on.");
+    }
+}

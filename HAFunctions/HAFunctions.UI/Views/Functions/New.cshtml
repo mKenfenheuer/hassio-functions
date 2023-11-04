@@ -1,0 +1,15 @@
+@model HAFunctions.UI.Models.FunctionModel
+@{
+    ViewData["Title"] = "Create new function";
+}
+
+@section Navbar
+{
+    <button type="submit" form="New" class="btn btn-danger">Save</button>
+}
+<h4>New Function</h4>
+<hr/>
+<form id="New" asp-action="New" class="form">
+    <label asp-for="FileName" class="form-label"></label>
+    <input type="text" class="form-control" asp-for="FileName" />
+</form>

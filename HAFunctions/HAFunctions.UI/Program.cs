@@ -19,6 +19,11 @@ public class Program
         builder.Services.AddSingleton<FunctionStore>();
         builder.Services.AddSingleton<ApiClient>();
 
+        builder.Services.AddLogging(options => {
+            options.AddConsole();
+            options.AddInMemoryLogger();
+        });
+
         builder.Services.AddHostedService<HomeAssistantConnectionService>();
 
         app = builder.Build();
