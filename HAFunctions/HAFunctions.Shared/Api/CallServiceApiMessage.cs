@@ -8,7 +8,6 @@ public class CallServiceApiMessage : ApiCommandMessage
     public CallServiceApiMessage()
     {
         Type = "call_service";
-        Target = new CallServiceTarget();
     }
 
     [JsonPropertyName("domain")]
@@ -21,10 +20,4 @@ public class CallServiceApiMessage : ApiCommandMessage
 
     [JsonPropertyName("target")]
     public CallServiceTarget Target { get; set; }
-
-    public class CallServiceTarget
-    {
-        [JsonPropertyName("entity_id")]
-        public string EntityId { get; set; }
-    }
 }

@@ -20,6 +20,11 @@ public sealed class InMemoryLoggerProvider : ILoggerProvider
         _currentConfig = config.CurrentValue;
         _onChangeToken = config.OnChange(updatedConfig => _currentConfig = updatedConfig);
     }
+    public InMemoryLoggerProvider(
+        InMemoryLoggerConfiguration config)
+    {
+        _currentConfig = config;
+    }
 
     public ILogger CreateLogger(string categoryName) =>
         _loggers.GetOrAdd(categoryName, name => new InMemoryLogger(name, GetCurrentConfig));

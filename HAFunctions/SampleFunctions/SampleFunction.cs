@@ -20,10 +20,10 @@ public class MySampleFunctionClass
         await Task.Run(() => {});
     }
 
-    [StateTrigger("light.licht_flur", to: "off")]
-    public async Task OnStateChangeLichtFlur(Context context) 
+    [StateTrigger("sensor.*")]
+    public async Task OnStateChange(Context context) 
     {
-        _logger.LogInformation($"State changed to off: {context.Event.Data.EntityId}");
+        _logger.LogInformation($"State changed to {context.Event.Data.NewState.StateValue} - {context.Event.Data.EntityId}");
         await Task.Run(() => {});
     }
 }

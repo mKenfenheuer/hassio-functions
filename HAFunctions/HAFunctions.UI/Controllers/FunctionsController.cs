@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using HAFunctions.UI.Models;
 using HAFunctions.UI.Services;
+using HAFunctions.UI.Logging;
 
 namespace HAFunctions.UI.Controllers;
 
@@ -37,7 +38,7 @@ public class FunctionsController : Controller
 
         _store.AddFunction(model);
 
-        return RedirectToAction("Edit", new { file = model.FileName });;
+        return RedirectToAction("Edit", new { file = model.FileName }); ;
     }
 
     [HttpGet]
@@ -46,17 +47,36 @@ public class FunctionsController : Controller
         return View(_store.Functions.FirstOrDefault(f => f.FileName == file));
     }
 
+    [HttpGet]
+    public IActionResult Log(string file)
+    {
+        var model = _store.Functions.FirstOrDefault(f => f.FileName == file);
+
+        if (!_store.LogStore.ContainsKey(file))
+        {
+            if (model != null)
+            {
+                return View("/Views/System/Logs.cshtml", new InMemoryLogEntry[0]);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+        return View("/Views/System/Logs.cshtml", _store.LogStore[file].ToArray());
+    }
+
     [HttpPost]
     public IActionResult Edit([Bind("FileName,Code")] FunctionModel model)
     {
         var fileModel = _store.Functions.FirstOrDefault(f => f.FileName == model.FileName);
 
-        if(fileModel == null)
+        if (fileModel == null)
             return NotFound();
 
         _store.UpdateFunction(model);
 
-        return RedirectToAction(nameof(Edit),new {file = fileModel.FileName});
+        return RedirectToAction(nameof(Edit), new { file = fileModel.FileName });
     }
 
     [HttpGet]
@@ -70,7 +90,7 @@ public class FunctionsController : Controller
     {
         var fileModel = _store.Functions.FirstOrDefault(f => f.FileName == model.FileName);
 
-        if(fileModel == null)
+        if (fileModel == null)
             return NotFound();
 
         _store.DeleteFunction(model);
