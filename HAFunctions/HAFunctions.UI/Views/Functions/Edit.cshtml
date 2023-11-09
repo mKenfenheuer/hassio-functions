@@ -29,6 +29,15 @@
 <script src="~/lib/codemirror/addon/lint/lint.js"></script>
 <script src="~/js/csharp-lint.js" ></script>
 <script>
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key === 's') {
+            // Prevent the Save dialog to open
+            e.preventDefault();
+            // Place your code here
+            console.log('CTRL + S');
+            $('#Edit').submit();
+        }
+    });
     var objectivecEditor = CodeMirror.fromTextArea(document.getElementById("Code"), {
         lineNumbers: true,
         matchBrackets: true,

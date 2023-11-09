@@ -64,6 +64,7 @@ public class FunctionStore
             }
             else
             {
+                _assemblies.Add(file, null);
                 string errorSummary = $"Error while compiling HAFunction {Path.GetFileName(file)}:";
                 foreach (var diagnostic in result.Diagnostics)
                     errorSummary += $"\r\n    {diagnostic}";
@@ -79,11 +80,11 @@ public class FunctionStore
                 Code = File.ReadAllText(kvp.Key),
                 FilePath = kvp.Key,
                 FileName = kvp.Key.Replace($"{directory}{Path.DirectorySeparatorChar}", ""),
-                DefinedFunctions = kvp.Value
+                DefinedFunctions = kvp.Value?
                                         .GetTypes()
                                         .SelectMany(t => t.GetMethods())
                                         .Where(m => m.GetCustomAttributes(typeof(HAFunctionTriggerAttribute), false).Length > 0)
-                                        .ToArray()
+                                        .ToArray() ?? new MethodInfo[0]
             });
         }
 
@@ -113,31 +114,55 @@ public class FunctionStore
 
     public async Task CallFunction(MethodInfo info, Context context)
     {
-        if (!_functionClassInstances.ContainsKey(info.DeclaringType))
+        var model = Functions.FirstOrDefault(f => f.DefinedFunctions.Any(df => df == info));
+        var logProvider = new InMemoryLoggerProvider(new InMemoryLoggerConfiguration()
         {
-            _functionClassInstances[info.DeclaringType] = CreateInstance(info.DeclaringType, _serviceProvider);
-        }
-
+            FunctionFile = model.FileName,
+            Store = LogStore
+        });
+        var logger = logProvider.CreateLogger(info.DeclaringType.FullName);
         var parameters = new List<object>();
 
-        foreach (var paramInfos in info.GetParameters())
+        try
         {
-            if (paramInfos.ParameterType == typeof(Context))
+            if (!_functionClassInstances.ContainsKey(info.DeclaringType))
             {
-                parameters.Add(context);
+                _functionClassInstances[info.DeclaringType] = CreateInstance(info.DeclaringType, _serviceProvider);
             }
-            if (paramInfos.ParameterType == typeof(Event))
+            foreach (var paramInfos in info.GetParameters())
             {
-                parameters.Add(context.Event);
-            }
-            if (paramInfos.ParameterType == typeof(HomeAssistant))
-            {
-                parameters.Add(new HomeAssistant(context.ApiClient));
+                if (paramInfos.ParameterType == typeof(Context))
+                {
+                    parameters.Add(context);
+                }
+                if (paramInfos.ParameterType == typeof(Event))
+                {
+                    parameters.Add(context.Event);
+                }
+                if (paramInfos.ParameterType == typeof(HomeAssistant))
+                {
+                    parameters.Add(new HomeAssistant(context.ApiClient));
+                }
             }
         }
-
-        await Task.Run(() => info.Invoke(_functionClassInstances[info.DeclaringType], parameters.ToArray()));
+        catch (Exception ex)
+        {
+            logger.LogError($"Error while constructing arguments for function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
+            _logger.LogError($"Error while constructing arguments for function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
+        }
+        try
+        {
+            var obj = info.Invoke(_functionClassInstances[info.DeclaringType], parameters.ToArray());
+            if(obj is Task task)
+                await task;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Error while calling function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
+            _logger.LogError($"Error while calling function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
+        }
     }
+
     private object CreateInstance(Type type, IServiceProvider provider)
     {
         List<Exception> exceptions = new List<Exception>();
@@ -180,7 +205,7 @@ public class FunctionStore
                 });
                 Type t = typeof(TypedInMemoryLogger<>);
                 Type gt = t.MakeGenericType(param.ParameterType.GenericTypeArguments);
-                var obj = gt.GetConstructor(new Type[] { typeof(InMemoryLogger) }).Invoke(new object[] {logProvider.CreateLogger(info.DeclaringType.FullName)});
+                var obj = gt.GetConstructor(new Type[] { typeof(InMemoryLogger) }).Invoke(new object[] { logProvider.CreateLogger(info.DeclaringType.FullName) });
                 paramObjs.Add(obj);
             }
             else

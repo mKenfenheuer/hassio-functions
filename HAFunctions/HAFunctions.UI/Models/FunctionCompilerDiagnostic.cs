@@ -14,6 +14,11 @@ public class FunctionCompilerDiagnostic
     public FileLinePosition From { get; set; }
     [JsonPropertyName("to")]
     public FileLinePosition To { get; set; }
+
+    public override string ToString()
+    {
+        return $"{From} - {To} {Severity}: {Message}";
+    }
 }
 
 public class FileLinePosition
@@ -22,4 +27,9 @@ public class FileLinePosition
     public int Line { get; set; }
     [JsonPropertyName("ch")]
     public int Character { get; set; }
+
+    public override string ToString()
+    {
+        return $"L{Line},{Character}";
+    }
 }

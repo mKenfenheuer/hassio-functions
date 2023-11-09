@@ -19,8 +19,8 @@ public class FunctionCompiler
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
 
-        MetadataReference[] references = assemblies.Where(a => a.Location != null && a.Location != string.Empty).Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray();
-
+        var references = assemblies.Where(a => a.Location != null && a.Location != string.Empty).Select(a => MetadataReference.CreateFromFile(a.Location)).ToList();
+        references.Add(MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location));
         // analyse and generate IL code from syntax tree
         CSharpCompilation compilation = CSharpCompilation.Create(
             assemblyName,

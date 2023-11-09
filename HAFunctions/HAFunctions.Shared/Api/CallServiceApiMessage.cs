@@ -16,8 +16,8 @@ public class CallServiceApiMessage : ApiCommandMessage
     public string Service { get; set; }
 
     [JsonPropertyName("service_data")]
-    public JsonObject ServiceData { get; set; } = new JsonObject();
+    public dynamic ServiceData { get; set; } = new JsonObject();
 
     [JsonPropertyName("target")]
-    public CallServiceTarget Target { get; set; }
+    public dynamic Target { get; set; }
 }
