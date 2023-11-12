@@ -4,17 +4,20 @@ using System.Threading.Tasks;
 
 public class BatteryMonitoring
 {
-    private readonly ILogger<BatteryMonitoring> _logger;
+  private readonly ILogger<BatteryMonitoring> _logger;
 
-    public BatteryMonitoring(ILogger<BatteryMonitoring> logger)
-    {
-        _logger = logger;
-    }
+  public BatteryMonitoring(ILogger<BatteryMonitoring> logger)
+  {
+    _logger = logger;
+  }
 
-    [NumericStateTrigger("^sensor.*_battery$", below: 10)]
-    public async Task OnBatteryStateChangeToProblem(HomeAssistant ha, Event ev) 
+  [NumericStateTrigger("^.*battery.*$", below: "10")]
+  public async Task OnBatteryStateChangeToProblem(HomeAssistant ha, Event ev)
+  {
+    if (ev.Data.NewState.Attributes["unit_of_measurement"].ToString() == "%" && ev.Data.NewState.Attributes["device_class"].ToString() == "battery")
     {
-      	await ha.Service.Notify.Notify.Call(data: new { message = $"{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel!"});
-      	_logger.LogInformation("{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel!");
+      await ha.Service.Notify.Notify.Call(data: new { message = $"{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel!" });
+      _logger.LogInformation("{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel!");
     }
+  }
 }
