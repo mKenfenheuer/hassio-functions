@@ -18,6 +18,7 @@ public class Program
         builder.Services.AddSingleton<FunctionCompiler>();
         builder.Services.AddSingleton<FunctionStore>();
         builder.Services.AddSingleton<ApiClient>();
+        builder.Services.AddSingleton<ExecutionTraceStore>();
 
         builder.Services.AddLogging(options => {
             options.AddConsole();

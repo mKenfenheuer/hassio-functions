@@ -111,3 +111,8 @@ button.accept-policy {
 .ha-function-string {
   color: #ca7242;
 }
+
+.dashboard-text-large {
+  font-size: 48px;
+  font-weight: 800;
+}

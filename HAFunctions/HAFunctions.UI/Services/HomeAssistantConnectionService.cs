@@ -12,21 +12,59 @@ public class HomeAssistantConnectionService : IHostedService
     public HomeAssistantConnectionService(ApiClient api, FunctionStore functions, ILogger<HomeAssistantConnectionService> logger)
     {
         _api = api;
-        _api.OnEventMessageReceived += OnMessageReceived;
+        _api.OnMessageReceived += OnMessageReceived;
         _functions = functions;
         _functions.LoadFunctions();
         _logger = logger;
     }
 
-    private async void OnMessageReceived(object sender, Context context)
+    private async void OnMessageReceived(object sender, ApiMessage message)
     {
-        await _functions.CallMatchingFunctions(context);
+        if(message is EventMessage stateChanged && stateChanged.Event.EventType == "state_changed")
+        {
+            var ha = new HomeAssistant(_api);
+            var newState = stateChanged.Event.Data.NewState;
+
+            var entityState = ha.States[newState.EntityId.GetDomain()][newState.EntityId.GetEntityIdWithoutDomain()];
+            entityState.Value = newState.StateValue;
+            foreach (var attr in newState.Attributes)
+            {
+                entityState[attr.Key] = attr.Value;
+            }
+        }
+        if (message is EventMessage eventMessage)
+        {
+            await _functions.CallMatchingFunctions(new Context()
+            {
+                ApiClient = _api,
+                Event = eventMessage.Event
+            });
+        }
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _api.ConnectAsync(cancellationToken);
-        var result = await _api.SendMessageAsync(new SubscribeEventMessage());
+        var ha = new HomeAssistant(_api);
+        var authResult = await _api.ConnectAsync(cancellationToken);
+        await _api.SendMessageAsync(new SubscribeEventMessage()
+        {
+            EventType = "state_changed"
+        });
+        var result = ((ApiResultMessage)await _api.SendMessageAsync(new FetchStatesMessage())).GetTyped<ApiEntityState[]>();
+        if (result.Success)
+        {
+            foreach (var state in result.Result)
+            {
+                var entityState = ha.States[state.EntityId.GetDomain()][state.EntityId.GetEntityIdWithoutDomain()];
+                entityState.Value = state.State;
+                foreach (var attr in state.Attributes)
+                {
+                    entityState[attr.Key] = attr.Value;
+                }
+            }
+        }
+
+        string str = result.ToString();
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

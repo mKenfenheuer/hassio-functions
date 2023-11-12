@@ -15,19 +15,21 @@ public class FunctionStore
     private Dictionary<Type, object> _functionClassInstances = new Dictionary<Type, object>();
     private Dictionary<string, Assembly> _assemblies = new Dictionary<string, Assembly>();
     private readonly FunctionCompiler _compiler;
+    private readonly ExecutionTraceStore _traceStore;
     private readonly IConfiguration _configuration;
     private readonly ILogger<FunctionStore> _logger;
     private readonly IServiceProvider _serviceProvider;
     private HAFunctionAssemblyLoadContext _assemblyLoadContext;
     public List<FunctionModel> Functions { get; set; } = new List<FunctionModel>();
 
-    public FunctionStore(FunctionCompiler compiler, IConfiguration configuration, ILogger<FunctionStore> logger, IServiceProvider serviceProvider)
+    public FunctionStore(FunctionCompiler compiler, IConfiguration configuration, ILogger<FunctionStore> logger, IServiceProvider serviceProvider, ExecutionTraceStore traceStore)
     {
         _compiler = compiler;
         _configuration = configuration;
         _logger = logger;
         _serviceProvider = serviceProvider;
         _assemblyLoadContext = new HAFunctionAssemblyLoadContext();
+        _traceStore = traceStore;
     }
 
     private void UnloadFunctions()
@@ -150,17 +152,39 @@ public class FunctionStore
             logger.LogError($"Error while constructing arguments for function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
             _logger.LogError($"Error while constructing arguments for function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
         }
+        DateTime startTime = DateTime.UtcNow;
         try
         {
             var obj = info.Invoke(_functionClassInstances[info.DeclaringType], parameters.ToArray());
-            if(obj is Task task)
+            if (obj is Task task)
                 await task;
+            var duration = DateTime.UtcNow - startTime;
+            _traceStore.AddTrace(new FunctionExecutionTrace()
+            {
+                FunctionFile = model.FileName,
+                MethodName = $"{info.DeclaringType.FullName}.{info.Name}",
+                Success = true,
+                RunDuration = duration.TotalMilliseconds                
+            });
+            logger.LogTrace($"Function execution took {duration.TotalMilliseconds} ms.");
         }
         catch (Exception ex)
         {
+            var duration = DateTime.UtcNow - startTime;
+
+            _traceStore.AddTrace(new FunctionExecutionTrace()
+            {
+                FunctionFile = model.FileName,
+                MethodName = $"{info.DeclaringType.FullName}.{info.Name}",
+                Success = false,
+                RunDuration = duration.TotalMilliseconds,
+                Exception = ex         
+            });
+            
             logger.LogError($"Error while calling function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
             _logger.LogError($"Error while calling function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
         }
+        GC.Collect();
     }
 
     private object CreateInstance(Type type, IServiceProvider provider)

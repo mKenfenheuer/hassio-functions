@@ -14,11 +14,12 @@ public class ApiClient
     private readonly ILogger<ApiClient> _logger;
     private readonly IConfiguration _configuration;
     private readonly string _accessToken;
+    private readonly List<byte> _buffer = new List<byte>();
     private bool _disconnect = false;
     private Task _receiveTask;
     private CancellationToken _cancellationToken;
     private Dictionary<int, TaskCompletionSource<ApiMessage>> TaskCompletionSources { get; set; } = new Dictionary<int, TaskCompletionSource<ApiMessage>>();
-    public event EventHandler<Context> OnEventMessageReceived;
+    public event EventHandler<ApiMessage> OnMessageReceived;
     public bool AutoReconnect { get; set; } = true;
     private int MessageIndex { get; set; } = 1;
 
@@ -57,21 +58,15 @@ public class ApiClient
                         {
                             TaskCompletionSources[resultMessage.Id].SetResult(message);
                         }
-                    if (message is EventMessage eventMessage)
-                    {
                         try
                         {
-                            _ = Task.Run(() => OnEventMessageReceived?.Invoke(this, new Context()
-                            {
-                                Event = eventMessage.Event,
-                                ApiClient = this,
-                            }));
+                            _ = Task.Run(() => OnMessageReceived?.Invoke(this, message));
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError($"Failed to receive message from HA Api: {ex}");
                         }
-                    }
+                    
 
                 }
                 catch (Exception ex)
@@ -91,7 +86,7 @@ public class ApiClient
             await ConnectAsync(_cancellationToken);
         }
     }
-
+    
     private async Task<ApiMessage?> ReceiveMessageAsync()
     {
         ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[10240]);
@@ -99,11 +94,19 @@ public class ApiClient
 
         if (!result.EndOfMessage)
         {
-            _logger.LogError("Message larger than 10KB!");
+            _buffer.AddRange(buffer.Take(result.Count));
             return null;
         }
 
-        string json = Encoding.UTF8.GetString(buffer.Take(result.Count).ToArray());
+        var data = buffer.Take(result.Count).ToArray();
+
+        if(_buffer.Count > 0)
+        {
+            data = _buffer.Concat(buffer.Take(result.Count)).ToArray();
+            _buffer.Clear();
+        }
+
+        string json = Encoding.UTF8.GetString(data.ToArray());
 
         var msgType = JsonSerializer.Deserialize<ApiMessage>(json);
 
@@ -149,7 +152,7 @@ public class ApiClient
 
         var timeout = Task.Run(async () =>
         {
-            await Task.Delay(5000);
+            await Task.Delay(60000);
             if (!taskCompletionSource.Task.IsCompleted)
             {
                 taskCompletionSource.SetException(new TimeoutException("Timeout waiting for api response message."));

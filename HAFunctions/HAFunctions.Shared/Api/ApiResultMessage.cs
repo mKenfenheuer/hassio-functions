@@ -17,7 +17,7 @@ public class ApiResultMessage : ApiCommandMessage
     [JsonPropertyName("error")]
     public ApiError Error { get; set; }
     [JsonPropertyName("result")]
-    public JsonObject Result { get; set; }
+    public dynamic Result { get; set; }
     public ApiResultMessageTyped<T> GetTyped<T>()
     {
         string json = JsonSerializer.Serialize(this);

@@ -1,6 +1,115 @@
-﻿@{
+﻿@model HomeDataModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <h4>Dashboard</h4>
-<hr/>
+<hr />
+
+<div class="row d-flex justify-content-around">
+    <div class="card col-12 col-sm-2 me-sm-1 mb-2 shadow bg-success text-light">
+        <div class="card-body">
+            <p class="mb-0 text-end"><span class="dashboard-text-large">@($"{Model.AverageRunDuration:0.00}")</span> ms
+            </p>
+            <p class="mb-0 text-end">Avg. Execution Time</h5>
+        </div>
+    </div>
+    <div class="card col-12 col-sm-2 me-sm-1 mb-2 shadow bg-info text-light">
+        <div class="card-body">
+            <p class="mb-0 text-end"><span class="dashboard-text-large">@Model.TotalExecutions</span></p>
+            <p class="mb-0 text-end">Total Executions</h5>
+        </div>
+    </div>
+    <div class="card col-12 col-sm-2 me-sm-1 mb-2 shadow bg-success text-light">
+        <div class="card-body">
+            <p class="mb-0 text-end"><span class="dashboard-text-large">@Model.TotalSuccessfulExecutions</span></p>
+            <p class="mb-0 text-end">Successful Executions</h5>
+        </div>
+    </div>
+    <div class="card col-12 col-sm-2 me-sm-1 mb-2 shadow bg-danger text-light">
+        <div class="card-body">
+            <p class="mb-0 text-end"><span class="dashboard-text-large">@Model.TotalFailedExecutions</span></p>
+            <p class="mb-0 text-end">Failed Executions</h5>
+        </div>
+    </div>
+    <div class="card col-12 col-sm-2 me-sm-1 mb-2 shadow bg-danger text-light">
+        <div class="card-body">
+            <p class="mb-0 text-end"><span class="dashboard-text-large">@($"{Model.FailureRate:0.00}")</span>%</p>
+            <p class="mb-0 text-end">Failure Rate</h5>
+        </div>
+    </div>
+</div>
+<div class="row d-flex justify-content-around">
+    <div class="mt-4">
+        <div class="card shadow">
+            <div class="card-header">
+                Summary by Function File
+            </div>
+            <div class="card-body ps-0 pe-0 pt-0">
+                <table class="table w-100">
+                    <thead>
+                        <tr class="text-end">
+                            <th class="text-start">File</th>
+                            <th>Avg. Execution Time</th>
+                            <th>Executions</th>
+                            <th>Successful</th>
+                            <th>Failed</th>
+                            <th>Failure Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var fileSummary in Model.SummaryByFunctionFile.OrderByDescending(f =>
+                        f.Value.TotalFailedExecutions))
+                        {
+                            <tr class="text-end">
+                                <td class="text-start">@fileSummary.Key</td>
+                                <td><strong>@($"{fileSummary.Value.AverageRunDuration:0.00}")</strong> ms</td>
+                                <td><strong>@fileSummary.Value.TotalExecutions</strong></td>
+                                <td><strong>@fileSummary.Value.TotalSuccessfulExecutions</strong></td>
+                                <td><strong>@fileSummary.Value.TotalFailedExecutions</strong></td>
+                                <td><strong>@($"{fileSummary.Value.FailureRate:0.00}")</strong> %</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4 d-flex justify-content-around">
+    <div>
+        <div class="card shadow">
+            <div class="card-header">
+                Summary by Function Method
+            </div>
+            <div class="card-body ps-0 pe-0 pt-0">
+                <table class="table w-100">
+                    <thead>
+                        <tr class="text-end">
+                            <th class="text-start">Method</th>
+                            <th>Avg. Execution Time</th>
+                            <th>Executions</th>
+                            <th>Successful</th>
+                            <th>Failed</th>
+                            <th>Failure Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var fileSummary in Model.SummaryByFunctionFileAndMethodName.OrderByDescending(f =>
+                        f.Value.TotalFailedExecutions))
+                        {
+                            <tr class="text-end">
+                                <td class="text-start">@fileSummary.Key</td>
+                                <td><strong>@($"{fileSummary.Value.AverageRunDuration:0.00}")</strong> ms</td>
+                                <td><strong>@fileSummary.Value.TotalExecutions</strong></td>
+                                <td><strong>@fileSummary.Value.TotalSuccessfulExecutions</strong></td>
+                                <td><strong>@fileSummary.Value.TotalFailedExecutions</strong></td>
+                                <td><strong>@($"{fileSummary.Value.FailureRate:0.00}")</strong> %</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
