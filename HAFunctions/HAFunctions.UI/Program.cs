@@ -13,14 +13,18 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews()
-                        .AddRazorRuntimeCompilation();
+        var controllers = builder.Services.AddControllersWithViews();
+        
+        if (builder.Environment.IsDevelopment())
+            controllers.AddRazorRuntimeCompilation();
+        
         builder.Services.AddSingleton<FunctionCompiler>();
         builder.Services.AddSingleton<FunctionStore>();
         builder.Services.AddSingleton<ApiClient>();
         builder.Services.AddSingleton<ExecutionTraceStore>();
 
-        builder.Services.AddLogging(options => {
+        builder.Services.AddLogging(options =>
+        {
             options.AddConsole();
             options.AddInMemoryLogger();
         });
@@ -30,27 +34,27 @@ public class Program
         app = builder.Build();
 
         //Enable relative path for HASSIO Ingress
-        app.Use(async (context, next) => 
+        app.Use(async (context, next) =>
         {
-            if(context.Request.Headers.ContainsKey("X-Ingress-Path"))
+            if (context.Request.Headers.ContainsKey("X-Ingress-Path"))
             {
                 context.Request.PathBase = context.Request.Headers["X-Ingress-Path"].ToString();
             }
             await next();
         });
-        
+
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
 
-            if(app.Configuration["HSTSEnabled"] == "true")
+            if (app.Configuration["HSTSEnabled"] == "true")
                 app.UseHsts();
 
-            if(app.Configuration["HTTPS:Redirection"] == "true")
+            if (app.Configuration["HTTPS:Redirection"] == "true")
                 app.UseHttpsRedirection();
         }
-        
+
         app.UseStaticFiles();
 
         app.UseRouting();
@@ -60,5 +64,5 @@ public class Program
             pattern: "{controller=Home}/{action=Index}/{id?}");
 
         app.Run();
-    } 
+    }
 }
