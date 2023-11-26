@@ -23,9 +23,11 @@ public class Event
     [JsonPropertyName("context")]
     public ApiContext Context { get; set; }
 
+    [JsonPropertyName("variables")]
+    public Variables Variables { get; set; }
+
     public override string ToString()
     {
         return JsonSerializer.Serialize(this);
     }
 }
-

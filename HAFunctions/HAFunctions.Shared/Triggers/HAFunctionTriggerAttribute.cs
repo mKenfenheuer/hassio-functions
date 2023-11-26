@@ -8,4 +8,5 @@ public abstract class HAFunctionTriggerAttribute : System.Attribute
     }
 
     public abstract bool IsMatch(Event e);
+    public abstract dynamic GetSubscriptionData();
 }

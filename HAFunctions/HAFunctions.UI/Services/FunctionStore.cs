@@ -20,6 +20,7 @@ public class FunctionStore
     private readonly IServiceProvider _serviceProvider;
     private HAFunctionAssemblyLoadContext _assemblyLoadContext;
     public List<FunctionModel> Functions { get; set; } = new List<FunctionModel>();
+    private Dictionary<string, MethodInfo> _haTriggers = new Dictionary<string, MethodInfo>();
 
     public FunctionStore(FunctionCompiler compiler, IConfiguration configuration, ILogger<FunctionStore> logger, IServiceProvider serviceProvider)
     {
@@ -98,8 +99,14 @@ public class FunctionStore
         return BitConverter.ToString(hashBytes).Replace("-", "");
     }
 
+    public void SetFunctionTrigger(string id, MethodInfo info)
+    {
+        _haTriggers[id] = info;
+    }
+
     public async Task CallMatchingFunctions(Context context)
     {
+        List<MethodInfo> methods = new List<MethodInfo>();
         foreach (var method in Functions.SelectMany(f => f.DefinedFunctions))
         {
             if (method.GetCustomAttributes()
@@ -107,9 +114,20 @@ public class FunctionStore
             .Select(a => a as HAFunctionTriggerAttribute)
             .Any(a => a.IsMatch(context.Event)))
             {
-                await CallFunction(method, context);
+                methods.Add(method);
             }
         }
+
+        foreach (var kvp in _haTriggers)
+        {
+            if (kvp.Key == (context?.Event?.Variables?.Trigger?.Id?.ToString() ?? ""))
+            {
+                methods.Add(kvp.Value);
+            }
+        }
+
+        foreach (var method in methods)
+            await CallFunction(method, context);
     }
 
     public async Task CallFunction(MethodInfo info, Context context)
@@ -153,7 +171,7 @@ public class FunctionStore
         try
         {
             var obj = info.Invoke(_functionClassInstances[info.DeclaringType], parameters.ToArray());
-            if(obj is Task task)
+            if (obj is Task task)
                 await task;
         }
         catch (Exception ex)

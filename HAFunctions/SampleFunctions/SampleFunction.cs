@@ -19,7 +19,7 @@ public class MySampleFunctionClass
     {
       try
       {
-        _logger.LogInformation($"State changed to on: {ev.Data.EntityId}");
+        //_logger.LogInformation($"State changed to on: {ev.Data.EntityId}");
       	var result = await ha.Service.Light.Turn_On.Call(target: new {entity_id = "light.licht_flur"});
       }
       catch(Exception ex)
@@ -33,7 +33,7 @@ public class MySampleFunctionClass
     {
       try
       {
-        _logger.LogInformation($"State changed to off: {ev.Data.EntityId}");
+        //_logger.LogInformation($"State changed to off: {ev.Data.EntityId}");
       	var result = await ha.Service.Light.Turn_Off.Call(target: new {entity_id = "light.licht_flur"});
       }
       catch(Exception ex)

@@ -10,6 +10,7 @@ public sealed class StateTriggerAttribute : HAFunctionTriggerAttribute
     private readonly string notFrom;
     private readonly string to;
     private readonly string notTo;
+    private int triggerId = -1;
 
     public string[] EntityIds => entityIds;
     public string From => from;
@@ -36,6 +37,9 @@ public sealed class StateTriggerAttribute : HAFunctionTriggerAttribute
 
     public override bool IsMatch(Event e)
     {
+        if (e.Data == null)
+            return false;
+
         if (!EntityIds.Any(id => id == e.Data.EntityId || Regex.IsMatch(e?.Data?.EntityId ?? "", id)))
             return false;
         if (From != null && e.Data.OldState.StateValue != from)
@@ -48,5 +52,19 @@ public sealed class StateTriggerAttribute : HAFunctionTriggerAttribute
             return false;
 
         return true;
+    }
+
+    public override dynamic GetSubscriptionData()
+    {
+        var data = new
+        {
+            platform = "state",
+            entity_id = EntityIds,
+            from = From,
+            not_from = NotFrom,
+            to = To,
+            not_to = NotTo,
+        };
+        return data;
     }
 }
