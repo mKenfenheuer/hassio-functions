@@ -1,13 +1,13 @@
 
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Security.Cryptography;
+using HAFunctions.FunctionsHost.Models;
 using HAFunctions.Shared;
-using HAFunctions.UI.Logging;
-using HAFunctions.UI.Models;
-using Microsoft.CodeAnalysis;
+using HAFunctions.Shared.Logging;
+using HAFunctions.Shared.Models;
+using HAFunctions.Shared.Services;
 
-namespace HAFunctions.UI.Services;
+namespace HAFunctions.FunctionsHost.Services;
 
 public class FunctionStore
 {
@@ -76,17 +76,19 @@ public class FunctionStore
 
         foreach (var kvp in _assemblies)
         {
+            var defs = kvp.Value?
+                                .GetTypes()
+                                .SelectMany(t => t.GetMethods())
+                                .Where(m => m.GetCustomAttributes(typeof(HAFunctionTriggerAttribute), false).Length > 0)
+                                .ToArray() ?? new MethodInfo[0];
             Functions.Add(new FunctionModel
             {
                 FileHash = ComputeFileHash(kvp.Key),
                 Code = File.ReadAllText(kvp.Key),
                 FilePath = kvp.Key,
                 FileName = kvp.Key.Replace($"{directory}{Path.DirectorySeparatorChar}", ""),
-                DefinedFunctions = kvp.Value?
-                                        .GetTypes()
-                                        .SelectMany(t => t.GetMethods())
-                                        .Where(m => m.GetCustomAttributes(typeof(HAFunctionTriggerAttribute), false).Length > 0)
-                                        .ToArray() ?? new MethodInfo[0]
+                DefinedFunctions = defs,
+                DefinedFunctionModels = defs.Select(m => new MethodModel(m)).ToArray()
             });
         }
 
@@ -102,12 +104,15 @@ public class FunctionStore
 
     public async Task CallMatchingFunctions(Context context)
     {
-        foreach (var method in Functions.SelectMany(f => f.DefinedFunctions))
+        List<FunctionModel> models = new List<FunctionModel>();
+        lock (Functions)
+            models = Functions.ToList();
+        foreach (var method in models.SelectMany(f => f.DefinedFunctions))
         {
             if (method.GetCustomAttributes()
             .Where(a => a is HAFunctionTriggerAttribute)
             .Select(a => a as HAFunctionTriggerAttribute)
-            .Any(a => a.IsMatch(context.Event)))
+            .Any(a => a.IsMatch(context.Event.Data.EntityId ?? "", context.Event.Data.OldState, context.Event.Data.NewState)))
             {
                 await CallFunction(method, context);
             }
@@ -164,7 +169,7 @@ public class FunctionStore
                 FunctionFile = model.FileName,
                 MethodName = $"{info.DeclaringType.FullName}.{info.Name}",
                 Success = true,
-                RunDuration = duration.TotalMilliseconds                
+                RunDuration = duration.TotalMilliseconds
             });
             logger.LogTrace($"Function execution took {duration.TotalMilliseconds} ms.");
         }
@@ -178,9 +183,9 @@ public class FunctionStore
                 MethodName = $"{info.DeclaringType.FullName}.{info.Name}",
                 Success = false,
                 RunDuration = duration.TotalMilliseconds,
-                Exception = ex         
+                Exception = ex
             });
-            
+
             logger.LogError($"Error while calling function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
             _logger.LogError($"Error while calling function {model.FileName} - {info.DeclaringType.FullName}.{info.Name}: {ex}");
         }

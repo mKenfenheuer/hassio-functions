@@ -1,7 +1,7 @@
 
-using HAFunctions.Shared;
+using HAFunctions.FunctionsHost.Services;
 
-namespace HAFunctions.UI.Services;
+namespace HAFunctions.Shared.Services;
 
 public class HomeAssistantConnectionService : IHostedService
 {

@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace HAFunctions.UI.Models;
+namespace HAFunctions.FunctionsHost.Models;
 
 public class HAFunctionAssemblyLoadContext : AssemblyLoadContext
 {

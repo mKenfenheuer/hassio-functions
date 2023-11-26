@@ -1,26 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
 using HAFunctions.UI.Models;
 using HAFunctions.UI.Services;
-using HAFunctions.UI.Logging;
+using HAFunctions.Shared.Logging;
+using HAFunctions.Shared.Models;
+using HAFunctions.Shared.Services;
 
 namespace HAFunctions.UI.Controllers;
 
 public class FunctionsController : Controller
 {
     private readonly ILogger<FunctionsController> _logger;
-    private readonly FunctionStore _store;
+    private readonly FunctionHostService _functionHost;
     private readonly FunctionCompiler _compiler;
-    public FunctionsController(ILogger<FunctionsController> logger, FunctionStore store, FunctionCompiler compiler)
+    public FunctionsController(ILogger<FunctionsController> logger, FunctionCompiler compiler, FunctionHostService functionHost)
     {
         _logger = logger;
-        _store = store;
         _compiler = compiler;
+        _functionHost = functionHost;
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View(_store.Functions);
+        return View(await _functionHost.GetFunctionsAsync());
     }
 
     [HttpGet]
@@ -31,69 +33,71 @@ public class FunctionsController : Controller
 
 
     [HttpPost]
-    public IActionResult New([Bind("FileName,Code")] FunctionModel model)
+    public async Task<IActionResult> New([Bind("FileName,Code")] FunctionModel model)
     {
         var FunctionCode = System.IO.File.ReadAllText("wwwroot/StartingFunction.cs.txt");
         model.Code = FunctionCode;
 
-        _store.AddFunction(model);
+        await _functionHost.AddFunction(model);
 
         return RedirectToAction("Edit", new { file = model.FileName }); ;
     }
 
     [HttpGet]
-    public IActionResult Edit(string file)
+    public async Task<IActionResult> Edit(string file)
     {
-        return View(_store.Functions.FirstOrDefault(f => f.FileName == file));
+        var functions = await _functionHost.GetFunctionsAsync();
+        return View(functions.FirstOrDefault(f => f.FileName == file));
     }
 
     [HttpGet]
-    public IActionResult Log(string file)
+    public async Task<IActionResult> Log(string file)
     {
-        var model = _store.Functions.FirstOrDefault(f => f.FileName == file);
-
-        if (!_store.LogStore.ContainsKey(file))
+        var functions = await _functionHost.GetFunctionsAsync();
+        var model = functions.FirstOrDefault(f => f.FileName == file);
+        if (model != null)
         {
-            if (model != null)
-            {
-                return View("/Views/System/Logs.cshtml", new InMemoryLogEntry[0]);
-            }
-            else
-            {
-                return NotFound();
-            }
+            var logs = await _functionHost.GetLogsAsync(file);
+            return View("/Views/System/Logs.cshtml", logs);
         }
-        return View("/Views/System/Logs.cshtml", _store.LogStore[file].ToArray());
+        else
+        {
+            return NotFound();
+        }
     }
 
-    [HttpPost]
-    public IActionResult Edit([Bind("FileName,Code")] FunctionModel model)
+    [HttpPost()]
+    public async Task<IActionResult> Edit([Bind("FileName,Code")] FunctionModel model)
     {
-        var fileModel = _store.Functions.FirstOrDefault(f => f.FileName == model.FileName);
+        var functions = await _functionHost.GetFunctionsAsync();
+        var fileModel = functions.FirstOrDefault(f => f.FileName == model.FileName);
 
         if (fileModel == null)
             return NotFound();
 
-        _store.UpdateFunction(model);
+        await _functionHost.UpdateFunction(model);
 
         return RedirectToAction(nameof(Edit), new { file = fileModel.FileName });
     }
 
     [HttpGet]
-    public IActionResult Delete(string file)
+    public async Task<IActionResult> Delete(string file)
     {
-        return View(_store.Functions.FirstOrDefault(f => f.FileName == file));
+        var functions = await _functionHost.GetFunctionsAsync();
+        var fileModel = functions.FirstOrDefault(f => f.FileName == file);
+        return View(fileModel);
     }
 
     [HttpPost]
-    public IActionResult Delete([Bind("FileName,Code")] FunctionModel model)
+    public async Task<IActionResult> Delete([Bind("FileName,Code")] FunctionModel model)
     {
-        var fileModel = _store.Functions.FirstOrDefault(f => f.FileName == model.FileName);
+        var functions = await _functionHost.GetFunctionsAsync();
+        var fileModel = functions.FirstOrDefault(f => f.FileName == model.FileName);
 
         if (fileModel == null)
             return NotFound();
 
-        _store.DeleteFunction(model);
+        await _functionHost.DeleteFunction(model);
 
         return RedirectToAction(nameof(Index));
     }

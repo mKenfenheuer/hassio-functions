@@ -1,4 +1,4 @@
-namespace HAFunctions.UI.Logging;
+namespace HAFunctions.Shared.Logging;
 
 using Microsoft.Extensions.Logging;
 

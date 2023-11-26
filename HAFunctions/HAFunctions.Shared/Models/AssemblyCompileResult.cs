@@ -1,8 +1,8 @@
 using System.Reflection;
-using HAFunctions.UI.Services;
+using HAFunctions.Shared.Services;
 using Microsoft.CodeAnalysis;
 
-namespace HAFunctions.UI.Models;
+namespace HAFunctions.Shared.Models;
 
 public class AssemblyCompileResult
 {

@@ -7,5 +7,5 @@ public abstract class HAFunctionTriggerAttribute : System.Attribute
     {
     }
 
-    public abstract bool IsMatch(Event e);
+    public abstract bool IsMatch(string entityId, State oldState, State newState);
 }

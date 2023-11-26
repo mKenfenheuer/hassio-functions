@@ -1,5 +1,5 @@
 
-namespace HAFunctions.UI.Logging;
+namespace HAFunctions.Shared.Logging;
 
 public class InMemoryLogStore
 {

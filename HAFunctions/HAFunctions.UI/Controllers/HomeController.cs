@@ -2,31 +2,26 @@
 using Microsoft.AspNetCore.Mvc;
 using HAFunctions.UI.Models;
 using HAFunctions.Shared;
+using HAFunctions.UI.Services;
+using HAFunctions.Shared.Models;
 
 namespace HAFunctions.UI.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly ExecutionTraceStore _traceStore;
+    private readonly FunctionHostService _functionHost;
 
-    public HomeController(ILogger<HomeController> logger, ExecutionTraceStore traceStore)
+    public HomeController(ILogger<HomeController> logger, FunctionHostService functionHost)
     {
         _logger = logger;
-        _traceStore = traceStore;
+        _functionHost = functionHost;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View(new HomeDataModel() {
-            TotalExecutions = _traceStore.TotalExecutions,
-            TotalFailedExecutions = _traceStore.TotalFailedExecutions,
-            TotalSuccessfulExecutions = _traceStore.TotalSuccessfulExecutions,
-            AverageRunDuration = _traceStore.AverageRunDuration,
-            SummaryByFunctionFileSeparateMethodName = _traceStore.SummaryByFunctionFileSeparateMethodName,
-            SummaryByFunctionFileAndMethodName = _traceStore.SummaryByFunctionFileAndMethodName,
-            SummaryByFunctionFile = _traceStore.SummaryByFunctionFile,
-        });
+        FunctionTracesModel traces = await _functionHost.GetFunctionTracesAsync();
+        return View(traces);
     }
     
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

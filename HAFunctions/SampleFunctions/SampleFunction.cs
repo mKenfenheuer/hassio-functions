@@ -17,7 +17,12 @@ public class BatteryMonitoring
     if (ev.Data.NewState.Attributes["unit_of_measurement"].ToString() == "%" && ev.Data.NewState.Attributes["device_class"].ToString() == "battery")
     {
       await ha.Service.Notify.Notify.Call(data: new { message = $"{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel!" });
-      _logger.LogInformation("{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel!");
+      _logger.LogInformation("{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel ROFL!");
     }
+  }
+
+  [StateTrigger(".*")]
+  public async Task StateChange(HomeAssistant ha, Event ev)
+  {
   }
 }

@@ -37,4 +37,9 @@ public static class Extensions
     {
         return str.Substring(str.IndexOf(".") + 1, str.Length - str.IndexOf(".") - 1);
     }
+
+    public static string GetTypeName(this string str)
+    {
+        return str.Substring(str.LastIndexOf(".") + 1, str.Length - str.LastIndexOf(".") - 1);
+    }
 }

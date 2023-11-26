@@ -14,7 +14,7 @@ public sealed class NumericStateTriggerAttribute : HAFunctionTriggerAttribute
     private double? TryParseString(string str)
     {
         double value = 0;
-        if(double.TryParse(str, out value))
+        if (double.TryParse(str, out value))
         {
             return value;
         }
@@ -46,18 +46,32 @@ public sealed class NumericStateTriggerAttribute : HAFunctionTriggerAttribute
     public double? AboveOrEqual => aboveOrEqual;
     public double? BelowOrEqual => belowOrEqual;
 
-    
 
-    public override bool IsMatch(Event e)
+
+    public override bool IsMatch(string entityId, State oldState, State newState)
     {
-        double value = 0;
+        double oldValue = 0;
+        double newValue = 0;
 
-        if(!double.TryParse(e.Data.NewState.StateValue, out value))
+        if (!double.TryParse(oldState.StateValue, out oldValue))
+            return false;
+        if (!double.TryParse(newState.StateValue, out newValue))
             return false;
 
-        if (!EntityIds.Any(id => id == e.Data.EntityId || Regex.IsMatch(e?.Data?.EntityId ?? "", id)))
+        if (!EntityIds.Any(id => id == entityId || Regex.IsMatch(entityId ?? "", id)))
             return false;
 
+        if (ValueMatches(oldValue))
+            return false;
+        
+        if (!ValueMatches(newValue))
+            return false;
+
+        return true;
+    }
+
+    private bool ValueMatches(double value)
+    {
         if (Above.HasValue && value <= Above)
             return false;
 

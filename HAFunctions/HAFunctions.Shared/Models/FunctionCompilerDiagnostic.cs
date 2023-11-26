@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.CodeAnalysis;
 
-namespace HAFunctions.UI.Models;
+namespace HAFunctions.Shared.Models;
 
 public class FunctionCompilerDiagnostic
 {

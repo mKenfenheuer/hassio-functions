@@ -19,6 +19,20 @@
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
             }
+        },
+        {
+            "name": "Host Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/HAFunctions/HAFunctions.FunctionsHost/bin/Debug/net7.0/HAFunctions.FunctionsHost.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/HAFunctions/HAFunctions.UI/",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://127.0.0.1:62847"
+            }
         }
     ]
 }

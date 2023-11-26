@@ -1,5 +1,6 @@
 using System.Reflection;
 using HAFunctions.Shared;
+using HAFunctions.Shared.Services;
 using HAFunctions.UI.Services;
 
 namespace HAFunctions.UI;
@@ -19,17 +20,8 @@ public class Program
             controllers.AddRazorRuntimeCompilation();
         
         builder.Services.AddSingleton<FunctionCompiler>();
-        builder.Services.AddSingleton<FunctionStore>();
-        builder.Services.AddSingleton<ApiClient>();
-        builder.Services.AddSingleton<ExecutionTraceStore>();
-
-        builder.Services.AddLogging(options =>
-        {
-            options.AddConsole();
-            options.AddInMemoryLogger();
-        });
-
-        builder.Services.AddHostedService<HomeAssistantConnectionService>();
+        builder.Services.AddSingleton<FunctionHostService>();
+        builder.Services.AddHostedService<FunctionHostService>();
 
         app = builder.Build();
 

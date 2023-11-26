@@ -1,4 +1,4 @@
-using HAFunctions.UI.Logging;
+using HAFunctions.Shared.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;

@@ -34,17 +34,17 @@ public sealed class StateTriggerAttribute : HAFunctionTriggerAttribute
         this.notTo = notTo;
     }
 
-    public override bool IsMatch(Event e)
+    public override bool IsMatch(string entityId, State oldState, State newState)
     {
-        if (!EntityIds.Any(id => id == e.Data.EntityId || Regex.IsMatch(e?.Data?.EntityId ?? "", id)))
+        if (!EntityIds.Any(id => id == entityId || Regex.IsMatch(entityId ?? "", id)))
             return false;
-        if (From != null && e.Data.OldState.StateValue != from)
+        if (From != null && oldState.StateValue != from)
             return false;
-        if (NotFrom != null && e.Data.OldState.StateValue == notFrom)
+        if (NotFrom != null && oldState.StateValue == notFrom)
             return false;
-        if (To != null && e.Data.NewState.StateValue != to)
+        if (To != null && newState.StateValue != to)
             return false;
-        if (NotTo != null && e.Data.NewState.StateValue == notTo)
+        if (NotTo != null && newState.StateValue == notTo)
             return false;
 
         return true;

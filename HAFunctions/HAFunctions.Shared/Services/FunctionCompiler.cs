@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Runtime.Loader;
-using HAFunctions.UI.Models;
+using HAFunctions.Shared.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 
-namespace HAFunctions.UI.Services;
+namespace HAFunctions.Shared.Services;
 
 public class FunctionCompiler 
 {

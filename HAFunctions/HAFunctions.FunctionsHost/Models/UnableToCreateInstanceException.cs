@@ -1,4 +1,4 @@
-namespace HAFunctions.UI.Models;
+namespace HAFunctions.FunctionsHost.Models;
 
 [Serializable]
 public class UnableToCreateInstanceException : Exception

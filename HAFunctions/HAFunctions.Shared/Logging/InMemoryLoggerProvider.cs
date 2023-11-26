@@ -3,7 +3,7 @@ using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace HAFunctions.UI.Logging;
+namespace HAFunctions.Shared.Logging;
 
 [UnsupportedOSPlatform("browser")]
 [ProviderAlias("InMemory")]
