@@ -1,7 +1,7 @@
 {
     "name": "HAFunctions",
     "slug": "hassio-functions",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Automation with simple C# functions",
     "url": "https://github.com/mkenfenheuer/hassio-functions",
     "arch": [
@@ -12,6 +12,14 @@
     "map":[
         "config:rw"
     ],
+    "options": {
+        "AutoReloadFunctions" : true,
+        "AutoReloadFunctionsAfterSeconds" : 10
+    },
+    "schema": {
+        "AutoReloadFunctions" : "bool",
+        "AutoReloadFunctionsAfterSeconds" : "int(0,)"
+    },
     "homeassistant_api": true,
     "ingress": true,
     "ingress_port": 80,
