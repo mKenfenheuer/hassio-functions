@@ -73,7 +73,7 @@ public class FunctionHostService : IHostedService
 
     public async Task<InMemoryLogEntry[]> GetLogsAsync(string file)
     {
-        return await JsonSerializer.DeserializeAsync<InMemoryLogEntry[]>(await _http.GetStreamAsync($"/api/System/Logs?file={file}"));
+        return await JsonSerializer.DeserializeAsync<InMemoryLogEntry[]>(await _http.GetStreamAsync($"/api/System/FunctionLogs?file={file}"));
     }
 
     public async Task<InMemoryLogEntry[]> GetSystemLogsAsync()

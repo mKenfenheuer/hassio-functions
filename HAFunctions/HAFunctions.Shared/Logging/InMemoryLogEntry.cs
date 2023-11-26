@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace HAFunctions.Shared.Logging;
 
 public class InMemoryLogEntry
@@ -9,11 +11,15 @@ public class InMemoryLogEntry
         Severity = severity;
         Message = message;
     }
-
+    [JsonPropertyName("Time")]
     public DateTime Time { get; set; }
+    [JsonPropertyName("Source")]
     public string Source { get; set; }
+    [JsonPropertyName("Severity")]
     public string Severity { get; set; }
+    [JsonPropertyName("Message")]
     public string Message { get; set; }
+    [JsonPropertyName("BootstrapClass")]
     public string BootstrapClass
     {
         get

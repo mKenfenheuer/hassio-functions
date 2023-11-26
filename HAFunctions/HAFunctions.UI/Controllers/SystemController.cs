@@ -17,8 +17,8 @@ public class SystemController : Controller
     }
 
     [HttpGet("Logs")]
-    public async Task<InMemoryLogEntry[]> Logs()
+    public async Task<IActionResult> Logs()
     {
-        return await _functionHost.GetSystemLogsAsync();
+        return View(await _functionHost.GetSystemLogsAsync());
     }
 }
