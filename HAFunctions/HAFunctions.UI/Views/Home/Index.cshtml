@@ -7,7 +7,7 @@
 <h4>Dashboard</h4>
 <hr />
 
-<div class="row d-flex justify-content-around">
+<div class="row d-flex m-2 m-sm-0 justify-content-around">
     <div class="card col-12 col-sm-2 me-sm-1 mb-2 shadow bg-success text-light">
         <div class="card-body">
             <p class="mb-0 text-end"><span class="dashboard-text-large">@($"{Model.AverageRunDuration:0.00}")</span> ms
@@ -46,7 +46,7 @@
             <div class="card-header">
                 Summary by Function File
             </div>
-            <div class="card-body ps-0 pe-0 pt-0">
+            <div class="card-body ps-0 pe-0 pt-0 overflow-scroll">
                 <table class="table w-100">
                     <thead>
                         <tr class="text-end">
@@ -83,7 +83,7 @@
             <div class="card-header">
                 Summary by Function Method
             </div>
-            <div class="card-body ps-0 pe-0 pt-0">
+            <div class="card-body ps-0 pe-0 pt-0 overflow-scroll">
                 <table class="table w-100">
                     <thead>
                         <tr class="text-end">
