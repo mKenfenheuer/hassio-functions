@@ -50,6 +50,8 @@ public sealed class NumericStateTriggerAttribute : HAFunctionTriggerAttribute
 
     public override bool IsMatch(string entityId, State oldState, State newState)
     {
+        if (oldState.StateValue == newState.StateValue)
+            return false;
         double oldValue = 0;
         double newValue = 0;
 
@@ -63,7 +65,7 @@ public sealed class NumericStateTriggerAttribute : HAFunctionTriggerAttribute
 
         if (ValueMatches(oldValue))
             return false;
-        
+
         if (!ValueMatches(newValue))
             return false;
 

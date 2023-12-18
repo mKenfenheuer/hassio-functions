@@ -58,15 +58,15 @@ public class ApiClient
                         {
                             TaskCompletionSources[resultMessage.Id].SetResult(message);
                         }
-                        try
-                        {
-                            _ = Task.Run(() => OnMessageReceived?.Invoke(this, message));
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError($"Failed to receive message from HA Api: {ex}");
-                        }
-                    
+                    try
+                    {
+                        _ = Task.Run(() => OnMessageReceived?.Invoke(this, message));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Failed to receive message from HA Api: {ex}");
+                    }
+
 
                 }
                 catch (Exception ex)
@@ -83,10 +83,18 @@ public class ApiClient
         if (AutoReconnect && !_cancellationToken.IsCancellationRequested && !_disconnect)
         {
             _logger.LogInformation($"Reconnecting to HomeAssistant WebSocket api at \"{_haApiUrl}\"");
+            try
+            {
+                await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed.", _cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Failed to disconnect from HA Api: {ex}");
+            }
             await ConnectAsync(_cancellationToken);
         }
     }
-    
+
     private async Task<ApiMessage?> ReceiveMessageAsync()
     {
         ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[10240]);
@@ -100,7 +108,7 @@ public class ApiClient
 
         var data = buffer.Take(result.Count).ToArray();
 
-        if(_buffer.Count > 0)
+        if (_buffer.Count > 0)
         {
             data = _buffer.Concat(buffer.Take(result.Count)).ToArray();
             _buffer.Clear();

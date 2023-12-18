@@ -36,6 +36,9 @@ public sealed class StateTriggerAttribute : HAFunctionTriggerAttribute
 
     public override bool IsMatch(string entityId, State oldState, State newState)
     {
+        if (oldState.StateValue == newState.StateValue)
+            return false;
+            
         if (!EntityIds.Any(id => id == entityId || Regex.IsMatch(entityId ?? "", id)))
             return false;
         if (From != null && oldState.StateValue != from)
