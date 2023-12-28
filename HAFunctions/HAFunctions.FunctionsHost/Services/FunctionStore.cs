@@ -44,15 +44,6 @@ public class FunctionStore
 
     public void LoadFunctions()
     {
-        System.Diagnostics.Process p = new System.Diagnostics.Process()
-        {
-            StartInfo = new System.Diagnostics.ProcessStartInfo()
-            {
-                FileName = "mount"
-            }
-        };
-        p.Start();
-
         string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/";
 
         if (!Directory.Exists(directory))
