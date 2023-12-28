@@ -44,8 +44,10 @@ public class FunctionStore
 
     public void LoadFunctions()
     {
-        string[] dirs = Directory.GetFiles("/", "*.cs");
-        
+        string[] dirs = Directory.GetFiles("/", "*.cs", new EnumerationOptions() {
+            RecurseSubdirectories = true,
+        });
+
         foreach (var dir in dirs)
             _logger.LogInformation(dir);
 
