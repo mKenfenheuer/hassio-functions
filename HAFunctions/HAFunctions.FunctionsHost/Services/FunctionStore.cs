@@ -44,7 +44,7 @@ public class FunctionStore
 
     public void LoadFunctions()
     {
-        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/HAFunctions/Functions";
+        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/addon_config/";
 
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory);

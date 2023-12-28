@@ -10,7 +10,6 @@
         "armhf"
     ],
     "map":[
-        "config:rw",
         "addon_config:rw"
     ],
     "options": {
