@@ -252,7 +252,7 @@ public class FunctionStore
 
     public void AddFunction(FunctionModel model)
     {
-        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/HAFunctions/Functions";
+        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config";
         var path = Path.Combine(directory, model.FileName);
         if (File.Exists(path))
         {
@@ -264,7 +264,7 @@ public class FunctionStore
 
     public void UpdateFunction(FunctionModel model)
     {
-        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/HAFunctions/Functions";
+        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config";
         var path = Path.Combine(directory, model.FileName);
         if (!File.Exists(path))
         {
@@ -276,7 +276,7 @@ public class FunctionStore
 
     public void DeleteFunction(FunctionModel model)
     {
-        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config/HAFunctions/Functions";
+        string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config";
         var path = Path.Combine(directory, model.FileName);
         if (!File.Exists(path))
         {
