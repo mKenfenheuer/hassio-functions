@@ -44,8 +44,9 @@ public class FunctionStore
 
     public void LoadFunctions()
     {
-        string[] dirs = Directory.GetDirectories("/");
-        foreach(var dir in dirs)
+        string[] dirs = Directory.GetFiles("/", "*.cs");
+        
+        foreach (var dir in dirs)
             _logger.LogInformation(dir);
 
         string directory = _configuration["Storage:FunctionStorageDir"] ?? "/data/";
