@@ -44,6 +44,10 @@ public class FunctionStore
 
     public void LoadFunctions()
     {
+        string[] dirs = Directory.GetDirectories("/");
+        foreach(var dir in dirs)
+            _logger.LogInformation(dir);
+            
         string directory = _configuration["Storage:FunctionStorageDir"] ?? "/addon_config/";
 
         if (!Directory.Exists(directory))
