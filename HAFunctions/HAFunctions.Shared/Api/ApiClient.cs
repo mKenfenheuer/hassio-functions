@@ -50,28 +50,35 @@ public class ApiClient
         {
             while (_ws.State == WebSocketState.Open && !_disconnect)
             {
+                ApiMessage? message = null;
                 try
                 {
-                    var message = await ReceiveMessageAsync();
+                    message = await ReceiveMessageAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed to receive message from HA Api: {ex}");
+                    break;
+                }
+                try
+                {
                     if (message is ApiResultMessage resultMessage)
                         if (TaskCompletionSources.ContainsKey(resultMessage.Id))
                         {
                             TaskCompletionSources[resultMessage.Id].SetResult(message);
                         }
-                    try
-                    {
-                        _ = Task.Run(() => OnMessageReceived?.Invoke(this, message));
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError($"Failed to receive message from HA Api: {ex}");
-                    }
-
-
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Failed to receive message from HA Api: {ex}");
+                    _logger.LogError($"Failed to set result of task for message from HA Api: {ex}");
+                }
+                try
+                {
+                    _ = Task.Run(() => OnMessageReceived?.Invoke(this, message));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed to call callback for received message from HA Api: {ex}");
                 }
             }
         }

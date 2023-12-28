@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using HAFunctions.FunctionsHost.Services;
 
 namespace HAFunctions.Shared.Services;
@@ -20,25 +21,32 @@ public class HomeAssistantConnectionService : IHostedService
 
     private async void OnMessageReceived(object sender, ApiMessage message)
     {
-        if(message is EventMessage stateChanged && stateChanged.Event.EventType == "state_changed")
+        try
         {
-            var ha = new HomeAssistant(_api);
-            var newState = stateChanged.Event.Data.NewState;
-
-            var entityState = ha.States[newState.EntityId.GetDomain()][newState.EntityId.GetEntityIdWithoutDomain()];
-            entityState.Value = newState.StateValue;
-            foreach (var attr in newState.Attributes)
+            if (message is EventMessage stateChanged && stateChanged.Event.EventType == "state_changed")
             {
-                entityState[attr.Key] = attr.Value;
+                var ha = new HomeAssistant(_api);
+                var newState = stateChanged.Event.Data.NewState;
+
+                var entityState = ha.States[newState.EntityId.GetDomain()][newState.EntityId.GetEntityIdWithoutDomain()];
+                entityState.Value = newState.StateValue;
+                foreach (var attr in newState.Attributes)
+                {
+                    entityState[attr.Key] = attr.Value;
+                }
+            }
+            if (message is EventMessage eventMessage)
+            {
+                await _functions.CallMatchingFunctions(new Context()
+                {
+                    ApiClient = _api,
+                    Event = eventMessage.Event
+                });
             }
         }
-        if (message is EventMessage eventMessage)
+        catch (Exception ex)
         {
-            await _functions.CallMatchingFunctions(new Context()
-            {
-                ApiClient = _api,
-                Event = eventMessage.Event
-            });
+            _logger.LogError($"Error while handling received message:\nMesssage: {JsonSerializer.Serialize(message)}\nException: {ex}");
         }
     }
 
