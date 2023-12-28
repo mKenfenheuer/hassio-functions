@@ -9,7 +9,7 @@ namespace HAFunctions.Shared;
 
 public class ApiClient
 {
-    private readonly ClientWebSocket _ws;
+    private ClientWebSocket _ws;
     private readonly Uri _haApiUrl;
     private readonly ILogger<ApiClient> _logger;
     private readonly IConfiguration _configuration;
@@ -190,6 +190,16 @@ public class ApiClient
         _cancellationToken = cancellationToken;
         try
         {
+            try
+            {
+                _ws?.Dispose();
+            }
+            catch (Exception ex)
+            { 
+                _logger.LogWarning($"Could not dispose WebSocket: {ex}");
+            }
+
+            _ws = new ClientWebSocket();
             await _ws.ConnectAsync(_haApiUrl, _cancellationToken);
 
             var authReqMessage = await ReceiveMessageAsync();

@@ -30,7 +30,7 @@ public class HomeAssistantConnectionService : IHostedService
     {
         try
         {
-            if (message is EventMessage stateChanged && stateChanged.Event.EventType == "state_changed")
+            if (message is EventMessage stateChanged && stateChanged?.Event?.EventType == "state_changed")
             {
                 var ha = new HomeAssistant(_api);
                 var newState = stateChanged.Event.Data.NewState;
@@ -42,6 +42,13 @@ public class HomeAssistantConnectionService : IHostedService
                     entityState[attr.Key] = attr.Value;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error while handling state changed message:\nMesssage: {JsonSerializer.Serialize((object)message)}\nException: {ex}");
+        }
+        try
+        {
             if (message is EventMessage eventMessage)
             {
                 await _functions.CallMatchingFunctions(new Context()
@@ -53,7 +60,7 @@ public class HomeAssistantConnectionService : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error while handling received message:\nMesssage: {JsonSerializer.Serialize(message)}\nException: {ex}");
+            _logger.LogError($"Error while handling received message:\nMesssage: {JsonSerializer.Serialize((object)message)}\nException: {ex}");
         }
     }
 
