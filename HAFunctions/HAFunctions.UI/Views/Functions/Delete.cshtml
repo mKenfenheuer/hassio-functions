@@ -1,3 +1,4 @@
+@using HAFunctions.Shared
 @model HAFunctions.Shared.Models.FunctionModel
 @{
     ViewData["Title"] = "Delete Function";
@@ -32,34 +33,20 @@
             <div class="accordion-body d-flex flex-column-reverse flex-md-row">
                 <div class="flex-grow-1 flex-shrink-1">
                     <p><strong>The following methods with trigger attributes were detected in the file:</strong></p>
-                    @foreach (var method in item.DefinedFunctions)
+                    @foreach (var method in item.DefinedFunctionModels)
                     {
-                        var triggers = method.CustomAttributes.Where(a => a.AttributeType.IsSubclassOf(typeof(HAFunctionTriggerAttribute)));
                         <p><code class="text-dark">
-                        @foreach(var trigger in triggers)
+                        @foreach(var trigger in method.Attributes)
                         {
-                            var parameters = new List<dynamic>();
-                            for(var i = 0; i < trigger.Constructor.GetParameters().Length; i++)
-                                if(trigger.ConstructorArguments[i].Value != null)
-                                    parameters.Add(new { Parameter = trigger.Constructor.GetParameters()[i], Argument = trigger.ConstructorArguments[i]});
-
-                            <span class="ha-function-bracket">@Html.Raw("[")</span><span class="ha-function-type">@(trigger.AttributeType.Name)</span>@Html.Raw("<span class=\"ha-function-methodname\">(</span>")
-                            @for(var i = 0; i < parameters.Count; i++)
+                            <span class="ha-function-bracket">@Html.Raw("[")</span><span class="ha-function-type">@(trigger.Name)</span>@Html.Raw("<span class=\"ha-function-methodname\">(</span>")
+                            @for(var i = 0; i < trigger.Parameters.Count; i++)
                             {
-                                var a = parameters[i];
-                                @Html.Raw($"{a.Parameter.Name}:") <span class="ha-function-string">
-                                @if(a.Argument.Value is string)
-                                {
-                                    @Html.Raw($"\"{a.Argument.Value?.ToString()}\"")
-                                }
-                                else 
-                                {
-                                    @Html.Raw($"{a.Argument.Value?.ToString()}")
-                                }</span>if(i+1 < parameters.Count){@Html.Raw(", ")}
+                                var a = trigger.Parameters[i];
+                                @Html.Raw($"{a.Name}:") <span class="ha-function-string">@Html.Raw($"{a.Value?.ToString()}")</span>if(i+1 < trigger.Parameters.Count){@Html.Raw(", ")}
                             }
                             @Html.Raw(")")<span class="ha-function-bracket">@Html.Raw("]")</span><br/>
                         }
-                        <span class="ha-function-type">@method.ReturnType.Name</span> <span class="ha-function-methodname">@method.Name</span><span class="ha-function-bracket">(</span>@foreach(var param in @method.GetParameters()) {<span class="ha-function-type">@param.ParameterType.Name</span> @param.Name if(param != method.GetParameters().LastOrDefault()) {<span>,</span>}}<span class="ha-function-bracket">) @Html.Raw("{")</span> ... <span class="ha-function-bracket">@Html.Raw("}")</span></code></p>
+                        <span class="ha-function-type">@method.ReturnType.GetTypeName()</span> <span class="ha-function-methodname">@method.Name</span><span class="ha-function-bracket">(</span>@foreach(var param in @method.Parameters) {<span class="ha-function-type">@param.Type.GetTypeName()</span> @param.Name if(param != method.Parameters.LastOrDefault()) {<span>,</span>}}<span class="ha-function-bracket">) @Html.Raw("{")</span> ... <span class="ha-function-bracket">@Html.Raw("}")</span></code></p>
                     }
                 </div>               
             </div>
