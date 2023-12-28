@@ -14,12 +14,19 @@ public class HomeAssistantConnectionService : IHostedService
     {
         _api = api;
         _api.OnMessageReceived += OnMessageReceived;
+        _api.OnClientDisconnected += OnClientDisconnected;
         _functions = functions;
         _functions.LoadFunctions();
         _logger = logger;
     }
 
-    private async void OnMessageReceived(object sender, ApiMessage message)
+    private async void OnClientDisconnected(object? sender, EventArgs e)
+    {
+        _logger.LogInformation("HA Api client disconnected. Will try to reconnect.");
+        await StartAsync(CancellationToken.None);
+    }
+
+    private async void OnMessageReceived(object? sender, ApiMessage message)
     {
         try
         {

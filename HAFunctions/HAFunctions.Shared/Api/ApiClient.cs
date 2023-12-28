@@ -20,6 +20,7 @@ public class ApiClient
     private CancellationToken _cancellationToken;
     private Dictionary<int, TaskCompletionSource<ApiMessage>> TaskCompletionSources { get; set; } = new Dictionary<int, TaskCompletionSource<ApiMessage>>();
     public event EventHandler<ApiMessage> OnMessageReceived;
+    public event EventHandler OnClientDisconnected;
     public bool AutoReconnect { get; set; } = true;
     private int MessageIndex { get; set; } = 1;
 
@@ -87,18 +88,22 @@ public class ApiClient
             _logger.LogError($"Failed to continously read messages from HA Api: {ex}");
         }
 
-        if (AutoReconnect && !_cancellationToken.IsCancellationRequested && !_disconnect)
+        try
         {
-            _logger.LogInformation($"Reconnecting to HomeAssistant WebSocket api at \"{_haApiUrl}\"");
-            try
-            {
-                await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed.", _cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Failed to disconnect from HA Api: {ex}");
-            }
-            await ConnectAsync(_cancellationToken);
+            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed.", _cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning($"Failed to disconnect from HA Api: {ex}");
+        }
+
+        try
+        {
+            _ = Task.Run(() => OnClientDisconnected?.Invoke(this, null));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Failed to call callback for disconnect from HA Api: {ex}");
         }
     }
 
