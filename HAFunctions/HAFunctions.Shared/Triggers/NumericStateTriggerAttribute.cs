@@ -50,14 +50,14 @@ public sealed class NumericStateTriggerAttribute : HAFunctionTriggerAttribute
 
     public override bool IsMatch(string entityId, State oldState, State newState)
     {
-        if (oldState.StateValue == newState.StateValue)
+        if (oldState?.StateValue == newState?.StateValue)
             return false;
         double oldValue = 0;
         double newValue = 0;
 
-        if (!double.TryParse(oldState.StateValue, out oldValue))
+        if (!double.TryParse(oldState?.StateValue, out oldValue))
             return false;
-        if (!double.TryParse(newState.StateValue, out newValue))
+        if (!double.TryParse(newState?.StateValue, out newValue))
             return false;
 
         if (!EntityIds.Any(id => id == entityId || Regex.IsMatch(entityId ?? "", id)))
