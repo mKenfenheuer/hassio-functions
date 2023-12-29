@@ -6,6 +6,7 @@ using HAFunctions.Shared;
 using HAFunctions.Shared.Logging;
 using HAFunctions.Shared.Models;
 using HAFunctions.Shared.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace HAFunctions.FunctionsHost.Services;
 
@@ -149,6 +150,11 @@ public class FunctionStore
                 if (paramInfos.ParameterType == typeof(HomeAssistant))
                 {
                     parameters.Add(new HomeAssistant(context.ApiClient));
+                }
+                if (paramInfos.ParameterType == typeof(DataStore))
+                {
+                    string directory = _configuration["Storage:FunctionStorageDir"] ?? "/config";
+                    parameters.Add(new DataStore(new DbContextOptionsBuilder().UseSqlite($"Data Source={directory}/app_data.sqlite").Options));
                 }
             }
         }

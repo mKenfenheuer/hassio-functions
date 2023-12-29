@@ -1,4 +1,5 @@
 using HAFunctions.Shared;
+using HAFunctions.Shared.Services;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -11,18 +12,17 @@ public class BatteryMonitoring
     _logger = logger;
   }
 
-  [NumericStateTrigger("^.*battery.*$", below: "10")]
-  public async Task OnBatteryStateChangeToProblem(HomeAssistant ha, Event ev)
+  [StateTrigger("binary_sensor.fenster_wohnzimmer_mitte_state", to: "on")]
+  public async Task OnWohnzimmerWindowOpen(HomeAssistant ha, Event ev, DataStore data)
   {
-    if (ev.Data.NewState.Attributes["unit_of_measurement"].ToString() == "%" && ev.Data.NewState.Attributes["device_class"].ToString() == "battery")
-    {
-      await ha.Service.Notify.Notify.Call(data: new { message = $"{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel!" });
-      _logger.LogInformation("{ev.Data.EntityId.GetEntityIdWithoutDomain().ToPascalCase()} benötigt einen Batteriewechsel ROFL!");
-    }
+    await data.Set($"climate_state_wohnzimmer", ha.States.climate.nspanel_thermostat_03_thermostat.temperature);
+    await ha.Service.Climate.SetTemperature.Call(new { temperature = 15.0 }, new { entity_id = "climate.nspanel_thermostat_03_thermostat" });
   }
-
-  [StateTrigger(".*")]
-  public async Task StateChange(HomeAssistant ha, Event ev)
+  [StateTrigger("binary_sensor.fenster_wohnzimmer_mitte_state", to: "off")]
+  public async Task OnWohnzimmerWindowClose(HomeAssistant ha, Event ev, DataStore data)
   {
+    var previous = await data.Get<float>($"climate_state_wohnzimmer");
+    var result = await ha.Service.Climate.SetTemperature.Call(new { temperature = previous }, new { entity_id = "climate.nspanel_thermostat_03_thermostat" });
+    _logger.LogInformation($"{result}");
   }
 }

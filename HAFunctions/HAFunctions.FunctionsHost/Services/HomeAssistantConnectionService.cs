@@ -68,10 +68,12 @@ public class HomeAssistantConnectionService : IHostedService
     {
         var ha = new HomeAssistant(_api);
         var authResult = await _api.ConnectAsync(cancellationToken);
+        
         await _api.SendMessageAsync(new SubscribeEventMessage()
         {
             EventType = "state_changed"
         });
+
         var result = ((ApiResultMessage)await _api.SendMessageAsync(new FetchStatesMessage())).GetTyped<ApiEntityState[]>();
         if (result.Success)
         {

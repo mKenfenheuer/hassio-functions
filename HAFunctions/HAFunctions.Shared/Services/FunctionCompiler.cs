@@ -21,6 +21,8 @@ public class FunctionCompiler
 
         var references = assemblies.Where(a => a.Location != null && a.Location != string.Empty).Select(a => MetadataReference.CreateFromFile(a.Location)).ToList();
         references.Add(MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(Microsoft.EntityFrameworkCore.DbContext).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(Microsoft.EntityFrameworkCore.SqliteDbContextOptionsBuilderExtensions).Assembly.Location));
         // analyse and generate IL code from syntax tree
         CSharpCompilation compilation = CSharpCompilation.Create(
             assemblyName,
