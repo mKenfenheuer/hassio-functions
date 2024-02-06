@@ -76,9 +76,9 @@ public class HomeAssistantConnectionService : IHostedService
         
         while(!authResult)
         {
-            authResult = await _api.ConnectAsync(cancellationToken);
             _logger.LogInformation("Connection failed. Retry in 1 sec.");
             await Task.Delay(1000);
+            authResult = await _api.ConnectAsync(cancellationToken);
         }
 
         _connected = true;
