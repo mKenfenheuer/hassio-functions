@@ -10,6 +10,7 @@ public class HomeAssistantConnectionService : IHostedService
     private readonly FunctionStore _functions;
     private readonly ILogger<HomeAssistantConnectionService> _logger;
 
+    private bool _connected = false;
     public HomeAssistantConnectionService(ApiClient api, FunctionStore functions, ILogger<HomeAssistantConnectionService> logger)
     {
         _api = api;
@@ -22,8 +23,12 @@ public class HomeAssistantConnectionService : IHostedService
 
     private async void OnClientDisconnected(object? sender, EventArgs e)
     {
-        _logger.LogInformation("HA Api client disconnected. Will try to reconnect.");
-        await StartAsync(CancellationToken.None);
+        if (_connected)
+        {
+            _connected = false;
+            _logger.LogInformation("HA Api client disconnected. Will try to reconnect.");
+            await StartAsync(CancellationToken.None);
+        }
     }
 
     private async void OnMessageReceived(object? sender, ApiMessage message)
@@ -69,6 +74,15 @@ public class HomeAssistantConnectionService : IHostedService
         var ha = new HomeAssistant(_api);
         var authResult = await _api.ConnectAsync(cancellationToken);
         
+        while(!authResult)
+        {
+            authResult = await _api.ConnectAsync(cancellationToken);
+            _logger.LogInformation("Connection failed. Retry in 1 sec.");
+            await Task.Delay(1000);
+        }
+
+        _connected = true;
+
         await _api.SendMessageAsync(new SubscribeEventMessage()
         {
             EventType = "state_changed"
@@ -93,6 +107,8 @@ public class HomeAssistantConnectionService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        if(_connected)
         await _api.DisconnectAsync();
+        _connected = false;
     }
 }

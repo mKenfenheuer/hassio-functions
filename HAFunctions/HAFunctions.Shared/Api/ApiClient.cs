@@ -195,7 +195,7 @@ public class ApiClient
                 _ws?.Dispose();
             }
             catch (Exception ex)
-            { 
+            {
                 _logger.LogWarning($"Could not dispose WebSocket: {ex}");
             }
 
@@ -230,6 +230,13 @@ public class ApiClient
     {
         _logger.LogInformation($"Disconnecting from HomeAssistant WebSocket api at \"{_haApiUrl}\"");
         _disconnect = true;
-        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Caio.", CancellationToken.None);
+        try
+        {
+            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Caio.", CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogInformation($"Error disconnecting from HomeAssistant WebSocket api at \"{_haApiUrl}\": {ex.Message}");
+        }
     }
 }
